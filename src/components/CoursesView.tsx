@@ -598,13 +598,17 @@ interface CoursesViewProps {
   onOpenSimulation: (simType: 'titrasi_kimia' | 'fisika_newton') => void;
   onOpenModulAjar: (subject: string) => void;
   onNavigateTab?: (tab: string) => void;
+  initialCourseId?: string | null;
+  onClearInitialCourse?: () => void;
 }
 
 export const CoursesView: React.FC<CoursesViewProps> = ({ 
   currentUser,
   onOpenSimulation,
   onOpenModulAjar,
-  onNavigateTab
+  onNavigateTab,
+  initialCourseId,
+  onClearInitialCourse
 }) => {
   const isTeacher = currentUser.role === 'guru';
   const isIPS = currentUser.role === 'siswa_ips';
@@ -634,7 +638,24 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
   const [consultationNotice, setConsultationNotice] = useState<string | null>(null);
 
   // Retrieve user schedule to match subjects
-  const userSchedule = MOCK_SCHEDULE_BY_ROLE[currentUser.role] || [];
+  const userSchedule = MOCK_SCHEDULE_BY_ROLE[currentUser.role] || MOCK_SCHEDULE_BY_ROLE['siswa_mipa'] || [];
+
+  // Respond to initial course request from schedule navigation
+  useEffect(() => {
+    if (initialCourseId) {
+      const match = MOCK_COURSES.find((c) => {
+        if (c.id === initialCourseId) return true;
+        const cn = c.name.toLowerCase();
+        const target = initialCourseId.toLowerCase();
+        return cn === target || cn.includes(target) || target.includes(cn);
+      });
+      if (match) {
+        setSelectedCourse(match);
+        setActiveChapterId(match.chapters[0]?.id || null);
+        setIsPlaying(false);
+      }
+    }
+  }, [initialCourseId]);
 
   // Helper to match timetable slot with corresponding Course
   const findMatchingCourse = (slotSubject: string): SubjectCourse | undefined => {
@@ -915,6 +936,7 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
     setIsPlaying(false);
     setVideoLoadError(false);
     stopTeacherScript();
+    onClearInitialCourse?.();
   };
 
   const formatVideoTime = (sec: number) => {
@@ -1312,7 +1334,14 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
                     <h3 className="font-bold text-slate-900 text-base group-hover:text-[#0284c7] transition-colors leading-snug">
                       {course.name}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    {course.topic && (
+                      <div className="mt-1">
+                        <span className="text-[11px] font-semibold text-sky-800 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md inline-block">
+                          Materi Pokok: {course.topic}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
                       <span>Guru Pengampu:</span>
                       <span className="font-semibold text-slate-700">{course.teacher}</span>
                     </p>

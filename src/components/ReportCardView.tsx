@@ -22,7 +22,7 @@ export const ReportCardView: React.FC<ReportCardViewProps> = ({ currentUser }) =
   // Grades for MIPA (Rafiandra)
   const mipaGrades = [
     {
-      subject: 'Kimia Analitik (Peminatan)',
+      subject: 'Kimia Peminatan',
       teacher: 'Drs. Bambang Sudarsono, M.Si',
       kkm: 78,
       formatif: 92,
@@ -42,7 +42,7 @@ export const ReportCardView: React.FC<ReportCardViewProps> = ({ currentUser }) =
       desc: 'Memahami prinsip hukum gerak Newton dan gesekan pada bidang miring secara analitis.'
     },
     {
-      subject: 'Matematika Peminatan',
+      subject: 'Matematika Tingkat Lanjut',
       teacher: 'Ibu Ratna Dewi, S.Pd',
       kkm: 75,
       formatif: 85,
@@ -52,7 +52,7 @@ export const ReportCardView: React.FC<ReportCardViewProps> = ({ currentUser }) =
       desc: 'Mampu menyelesaikan masalah kontekstual limit dan turunan fungsi trigonometri dengan tepat.'
     },
     {
-      subject: 'Biologi Sel',
+      subject: 'Biologi Peminatan',
       teacher: 'Ibu Endang Suryani, M.Si',
       kkm: 75,
       formatif: 86,

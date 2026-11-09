@@ -73,7 +73,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     if (agenda.title.includes('Matematika')) {
       const exam = userExams.find((e) => e.title.includes('Matematika'));
       if (exam) onStartExam(exam);
-      else onOpenModulAjar('Matematika Peminatan');
+      else onOpenModulAjar('Matematika Tingkat Lanjut');
     } else if (agenda.title.includes('Kimia')) {
       onOpenSimulation('titrasi_kimia');
     } else if (agenda.title.includes('Fisika')) {
@@ -259,11 +259,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { subject: 'Termodinamika & Kalor', title: 'Hukum I Termo & Mesin Carnot', color: 'border-rose-300 hover:bg-rose-50/50', tag: 'Fisika Peminatan' },
-                { subject: 'Termokimia & Entalpi', title: 'Eksoterm, Kalorimetri & Hess', color: 'border-orange-300 hover:bg-orange-50/50', tag: 'Kimia Analitik' },
-                { subject: 'Struktur Sel & Transpor Membran', title: 'Fosfolipid, Osmosis & Plasmolisis', color: 'border-emerald-300 hover:bg-emerald-50/50', tag: 'Biologi Sel' },
-                { subject: 'Polinomial & Suku Banyak', title: 'Pembagian Horner & Teorema Sisa', color: 'border-violet-300 hover:bg-violet-50/50', tag: 'Matematika Lanjut' },
-                { subject: 'Kimia Analitik', title: 'Titrasi Asam Basa Stoikiometri', color: 'border-amber-300 hover:bg-amber-50/50', tag: 'Sains Kimia' },
-                { subject: 'Fisika Peminatan', title: 'Hukum Newton & Bidang Miring', color: 'border-sky-300 hover:bg-sky-50/50', tag: 'Sains Fisika' },
+                { subject: 'Termokimia & Entalpi', title: 'Eksoterm, Kalorimetri & Hess', color: 'border-orange-300 hover:bg-orange-50/50', tag: 'Kimia Peminatan' },
+                { subject: 'Struktur Sel & Transpor Membran', title: 'Fosfolipid, Osmosis & Plasmolisis', color: 'border-emerald-300 hover:bg-emerald-50/50', tag: 'Biologi Peminatan' },
+                { subject: 'Polinomial & Suku Banyak', title: 'Pembagian Horner & Teorema Sisa', color: 'border-violet-300 hover:bg-violet-50/50', tag: 'Matematika Tingkat Lanjut' },
+                { subject: 'Kimia Peminatan', title: 'Titrasi Asam Basa Stoikiometri', color: 'border-amber-300 hover:bg-amber-50/50', tag: 'Kimia Peminatan' },
+                { subject: 'Fisika Peminatan', title: 'Hukum Newton & Bidang Miring', color: 'border-sky-300 hover:bg-sky-50/50', tag: 'Fisika Peminatan' },
               ].map((item, idx) => (
                 <div
                   key={idx}

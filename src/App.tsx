@@ -44,6 +44,7 @@ export default function App() {
   const [isMobileMockupOpen, setIsMobileMockupOpen] = useState<boolean>(false);
   const [activeModulAjar, setActiveModulAjar] = useState<ModulAjarData | null>(null);
   const [activeSimInitial, setActiveSimInitial] = useState<'titrasi_kimia' | 'fisika_newton'>('titrasi_kimia');
+  const [selectedCourseForView, setSelectedCourseForView] = useState<string | null>(null);
   
   // Attendance State
   const [hasCheckedIn, setHasCheckedIn] = useState<boolean>(false);
@@ -113,6 +114,11 @@ export default function App() {
   const handleOpenModulAjar = (subjectName: string) => {
     const found = resolveModulAjar(subjectName);
     setActiveModulAjar(found);
+  };
+
+  const handleNavigateToCourse = (courseId: string, _subjectName?: string) => {
+    setSelectedCourseForView(courseId);
+    setActiveTab('kelas');
   };
 
   const handleSuccessCheckIn = (timeStr: string) => {
@@ -269,6 +275,8 @@ export default function App() {
                     onOpenSimulation={handleOpenSimulation}
                     onOpenModulAjar={handleOpenModulAjar}
                     onNavigateTab={setActiveTab}
+                    initialCourseId={selectedCourseForView}
+                    onClearInitialCourse={() => setSelectedCourseForView(null)}
                   />
                 )}
 
@@ -280,6 +288,7 @@ export default function App() {
                   <ScheduleView 
                     currentUser={currentUser}
                     onOpenModulAjar={handleOpenModulAjar} 
+                    onNavigateToCourse={handleNavigateToCourse}
                   />
                 )}
 

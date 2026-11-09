@@ -107,8 +107,8 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
   const [cbtExams, setCbtExams] = useState<CBTExamPackage[]>([
     {
       id: 'cbt_01',
-      title: 'Penilaian Tengah Semester (PTS) Kimia Fase F',
-      subject: 'Kimia Analitik & Larutan',
+      title: 'Penilaian Tengah Semester (PTS) Kimia Peminatan Fase F',
+      subject: 'Kimia Peminatan',
       targetClass: 'Kelas XI MIPA 1 & XI MIPA 2',
       dateStr: 'Senin, 9 November 2026',
       timeStr: '13:00 - 14:30 WIB',
@@ -691,7 +691,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
 
                 <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl space-y-2 border border-slate-200 dark:border-slate-700">
                   <h4 className="font-bold text-xs text-slate-900 dark:text-white">
-                    PTS Kimia Analitik Fase F
+                    PTS Kimia Peminatan Fase F
                   </h4>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
                     <div className="flex justify-between">

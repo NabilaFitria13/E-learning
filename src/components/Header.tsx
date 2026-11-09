@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
     },
     {
       id: 2,
-      title: 'PTS Kimia Analitik & CBT',
+      title: 'PTS Kimia Peminatan & CBT',
       desc: 'Jadwal ujian penilaian tengah semester akan berlangsung pukul 13.00 WIB.',
       time: '25 menit lalu',
       type: 'warning',

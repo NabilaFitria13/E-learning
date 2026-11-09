@@ -108,6 +108,7 @@ export interface AgendaItem {
 export interface SubjectCourse {
   id: string;
   name: string;
+  topic?: string;
   category: 'SMA MIPA' | 'SMA IPS' | 'Umum' | 'Pengembangan';
   scheduleGroup?: 'Peminatan' | 'Wajib' | 'Pengembangan';
   teacher: string;

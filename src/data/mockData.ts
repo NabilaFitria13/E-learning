@@ -1815,6 +1815,15 @@ export const MOCK_MODUL_AJAR: Record<string, ModulAjarData> = {
 // =========================================================================
 // HELPER TO RESOLVE MODUL AJAR FOR ANY GIVEN SUBJECT OR TOPIC
 // =========================================================================
+// Register synchronized aliases for Modul Ajar
+MOCK_MODUL_AJAR['Kimia Peminatan'] = MOCK_MODUL_AJAR['Kimia Analitik'];
+MOCK_MODUL_AJAR['Biologi Peminatan'] = MOCK_MODUL_AJAR['Biologi Sel'];
+MOCK_MODUL_AJAR['Matematika Tingkat Lanjut'] = MOCK_MODUL_AJAR['Matematika Peminatan'];
+MOCK_MODUL_AJAR['Projek Penguatan Profil Pelajar Pancasila (P5)'] = MOCK_MODUL_AJAR['Projek Penguatan P5'];
+
+// =========================================================================
+// HELPER TO RESOLVE MODUL AJAR FOR ANY GIVEN SUBJECT OR TOPIC
+// =========================================================================
 export const resolveModulAjar = (subjectName: string): ModulAjarData => {
   if (!subjectName) return MOCK_MODUL_AJAR['Bahasa Indonesia'];
   
@@ -1839,14 +1848,17 @@ export const resolveModulAjar = (subjectName: string): ModulAjarData => {
   }
 
   // Specific course keyword mapping
-  if (s.includes('kimia')) return MOCK_MODUL_AJAR['Kimia Analitik'];
+  if (s.includes('kimia')) return MOCK_MODUL_AJAR['Kimia Peminatan'] || MOCK_MODUL_AJAR['Kimia Analitik'];
   if (s.includes('fisika')) return MOCK_MODUL_AJAR['Fisika Peminatan'];
-  if (s.includes('biologi')) return MOCK_MODUL_AJAR['Biologi Sel'];
-  if (s.includes('matematika wajib') || s.includes('matematika umum')) {
-    return MOCK_MODUL_AJAR['Matematika Wajib'] || MOCK_MODUL_AJAR['Matematika Peminatan'];
+  if (s.includes('biologi')) return MOCK_MODUL_AJAR['Biologi Peminatan'] || MOCK_MODUL_AJAR['Biologi Sel'];
+  if (s.includes('matematika tingkat lanjut') || s.includes('matematika peminatan') || s.includes('kalkulus')) {
+    return MOCK_MODUL_AJAR['Matematika Tingkat Lanjut'] || MOCK_MODUL_AJAR['Matematika Peminatan'];
   }
-  if (s.includes('matematika') || s.includes('kalkulus') || s.includes('turunan') || s.includes('aljabar') || s.includes('limit')) {
-    return MOCK_MODUL_AJAR['Matematika Peminatan'];
+  if (s.includes('matematika wajib') || s.includes('matematika umum')) {
+    return MOCK_MODUL_AJAR['Matematika Wajib'];
+  }
+  if (s.includes('matematika')) {
+    return MOCK_MODUL_AJAR['Matematika Tingkat Lanjut'] || MOCK_MODUL_AJAR['Matematika Peminatan'];
   }
   if (s.includes('agama') || s.includes('islam') || s.includes('fiqih') || s.includes('muamalah') || s.includes('budi pekerti')) {
     return MOCK_MODUL_AJAR['Pendidikan Agama & Budi Pekerti'];
@@ -1861,10 +1873,10 @@ export const resolveModulAjar = (subjectName: string): ModulAjarData => {
   if (s.includes('pjok') || s.includes('olahraga') || s.includes('kebugaran') || s.includes('jasmani') || s.includes('senam')) return MOCK_MODUL_AJAR['PJOK'];
   if (s.includes('seni') || s.includes('budaya') || s.includes('rupa') || s.includes('musik')) return MOCK_MODUL_AJAR['Pendidikan Seni & Budaya'];
   if (s.includes('bk') || s.includes('bimbingan') || s.includes('konseling') || s.includes('karier') || s.includes('ptn') || s.includes('wali kelas')) return MOCK_MODUL_AJAR['Bimbingan Konseling (BK)'];
-  if (s.includes('p5') || s.includes('projek') || s.includes('profil pelajar') || s.includes('fasilitator')) return MOCK_MODUL_AJAR['Projek Penguatan P5'];
+  if (s.includes('p5') || s.includes('projek') || s.includes('profil pelajar') || s.includes('fasilitator')) return MOCK_MODUL_AJAR['Projek Penguatan Profil Pelajar Pancasila (P5)'] || MOCK_MODUL_AJAR['Projek Penguatan P5'];
   if (s.includes('riset') || s.includes('ilmiah') || s.includes('penelitian') || s.includes('kir')) return MOCK_MODUL_AJAR['Riset Sosial & Literasi Ilmiah'];
   if (s.includes('jurnalistik') || s.includes('esai') || s.includes('debat') || s.includes('bahasa') || s.includes('mgmp')) return MOCK_MODUL_AJAR['Bahasa Indonesia'];
-  if (s.includes('lab') || s.includes('laboratorium') || s.includes('praktikum')) return MOCK_MODUL_AJAR['Kimia Analitik'];
+  if (s.includes('lab') || s.includes('laboratorium') || s.includes('praktikum')) return MOCK_MODUL_AJAR['Kimia Peminatan'];
   if (s.includes('upacara') || s.includes('rohani') || s.includes('pembiasaan')) return MOCK_MODUL_AJAR['Pendidikan Pancasila'];
   
   // Fuzzy match with existing keys
@@ -1876,60 +1888,270 @@ export const resolveModulAjar = (subjectName: string): ModulAjarData => {
 };
 
 // =========================================================================
+// BASIS DATA MATA PELAJARAN TERPUSAT (CENTRAL SUBJECT DATABASE)
+// SMAN 25 JAKARTA - KURIKULUM MERDEKA FASE F (KELAS XI MIPA 1 & XI MIPA 2)
+// Total 44 Jam Pelajaran (JP) / Minggu
+// =========================================================================
+export interface CentralSubject {
+  id: string;
+  courseId: string;
+  name: string;
+  topic: string;
+  category: 'Peminatan MIPA' | 'Mata Pelajaran Wajib' | 'Pengembangan & P5';
+  teacher: string;
+  room: string;
+  jpWeekly: number;
+  description: string;
+}
+
+export const CENTRAL_SUBJECT_DATABASE: CentralSubject[] = [
+  {
+    id: 'sub_fisika',
+    courseId: 'course_fisika',
+    name: 'Fisika Peminatan',
+    topic: 'Hukum Newton & Dinamika Gerak',
+    category: 'Peminatan MIPA',
+    teacher: 'Ir. Ahmad Zulkarnain, S.Pd',
+    room: 'Lab Fisika Dasar / R.204',
+    jpWeekly: 5,
+    description: 'Analisis gaya normal, gaya gesek statis/kinetis, dan gerak lurus berubah beraturan pada bidang miring serta katrol ganda.'
+  },
+  {
+    id: 'sub_kimia',
+    courseId: 'course_kimia',
+    name: 'Kimia Peminatan',
+    topic: 'Titrasi Asam Basa & pH Larutan',
+    category: 'Peminatan MIPA',
+    teacher: 'Drs. Bambang Sudarsono, M.Si',
+    room: 'Lab Kimia Terpadu / R.204',
+    jpWeekly: 5,
+    description: 'Eksplorasi reaksi netralisasi asam basa, stoikiometri larutan, kurva titrasi, dan indikator fenolftalein secara interaktif.'
+  },
+  {
+    id: 'sub_bio',
+    courseId: 'course_bio',
+    name: 'Biologi Peminatan',
+    topic: 'Metabolisme Sel & Pola Pewarisan Sifat',
+    category: 'Peminatan MIPA',
+    teacher: 'Ibu Endang Suryani, M.Si',
+    room: 'Lab Biologi Lt. 2 / R.204',
+    jpWeekly: 5,
+    description: 'Studi mendalam mengenai katabolisme karbohidrat, siklus Krebs, fosforilasi oksidatif, dan hukum pewarisan sifat Mendel.'
+  },
+  {
+    id: 'sub_mat_pem',
+    courseId: 'course_mat_pem',
+    name: 'Matematika Tingkat Lanjut',
+    topic: 'Kalkulus Lanjut & Polinomial',
+    category: 'Peminatan MIPA',
+    teacher: 'Ibu Ratna Dewi, S.Pd',
+    room: 'Ruang R.204',
+    jpWeekly: 5,
+    description: 'Penguasaan turunan fungsi trigonometri, aturan rantai, garis singgung kurva, teorema sisa polinomial, dan persamaan lingkaran.'
+  },
+  {
+    id: 'sub_mat_wajib',
+    courseId: 'course_mat_wajib',
+    name: 'Matematika Wajib',
+    topic: 'Transformasi Geometri & Statistika Data Kelompok',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Ibu Ratna Dewi, S.Pd',
+    room: 'Ruang R.204',
+    jpWeekly: 3,
+    description: 'Transformasi geometri matriks 2x2 serta ukuran pemusatan dan penyebaran data kelompok.'
+  },
+  {
+    id: 'sub_bindo',
+    courseId: 'course_bindo',
+    name: 'Bahasa Indonesia',
+    topic: 'Teks Argumentasi & Kritik Sastra',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Ibu Dra. Sri Wahyuni, M.Pd',
+    room: 'Ruang R.204',
+    jpWeekly: 3,
+    description: 'Menulis teks argumentasi logis berdasarkan data empiris, kaidah kalimat efektif PUEBI, dan teknik debat ilmiah.'
+  },
+  {
+    id: 'sub_bing',
+    courseId: 'course_bing',
+    name: 'Bahasa Inggris',
+    topic: 'Analytical Exposition & Academic Debating',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Mr. David Siregar, M.Ed',
+    room: 'Lab Bahasa / R.204',
+    jpWeekly: 2,
+    description: 'Composing analytical exposition texts, expressing arguments coherently with empirical evidence and rhetorical devices.'
+  },
+  {
+    id: 'sub_agama',
+    courseId: 'course_agama',
+    name: 'Pendidikan Agama & Budi Pekerti',
+    topic: 'Fiqih Muamalah & Karakter Mulia',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Ust. H. Syarifuddin, M.Ag',
+    room: 'Ruang R.204',
+    jpWeekly: 3,
+    description: 'Kaidah fiqih transaksi ekonomi syariah, adab bermuamalah modern, moderasi beragama, dan akhlak karimah.'
+  },
+  {
+    id: 'sub_ppkn',
+    courseId: 'course_ppkn',
+    name: 'Pendidikan Pancasila',
+    topic: 'Supremasi Hukum & Konstitusi UUD 1945',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Ibu Siti Aminah, S.Pd',
+    room: 'Ruang R.204',
+    jpWeekly: 2,
+    description: 'Hierarki perundang-undangan di Indonesia, penegakan hak asasi manusia, integrasi nasional, dan etika kebangsaan.'
+  },
+  {
+    id: 'sub_sejarah',
+    courseId: 'course_sejarah',
+    name: 'Sejarah Indonesia',
+    topic: 'Kebangkitan Nasional 1928 & Pergerakan Modern',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Drs. Hendro Wibowo, M.Hum',
+    room: 'Ruang R.204',
+    jpWeekly: 2,
+    description: 'Kelahiran organisasi modern bumiputera Budi Utomo, Sarekat Islam, dan ikrar persatuan Sumpah Pemuda 1928.'
+  },
+  {
+    id: 'sub_seni',
+    courseId: 'course_seni',
+    name: 'Pendidikan Seni & Budaya',
+    topic: 'Prinsip Rupa Desain & Musik Nusantara',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Ibu Maya Lestari, S.Sn',
+    room: 'Sanggar Seni & Desain',
+    jpWeekly: 2,
+    description: 'Eksplorasi prinsip desain seni rupa murni dua dimensi, teknik kolase media campuran, dan apresiasi tangga nada gamelan.'
+  },
+  {
+    id: 'sub_pjok',
+    courseId: 'course_pjok',
+    name: 'PJOK',
+    topic: 'Kebugaran Jasmani & Sirkuit Latihan Atletik',
+    category: 'Mata Pelajaran Wajib',
+    teacher: 'Wahyu Hidayat, S.Pd',
+    room: 'GOR SMAN 25 & Lapangan Olahraga',
+    jpWeekly: 3,
+    description: 'Analisis derajat kebugaran jasmani, pengukuran denyut nadi Target Heart Rate, dan latihan sirkuit kekuatan otot.'
+  },
+  {
+    id: 'sub_bk',
+    courseId: 'course_bk',
+    name: 'Bimbingan Konseling (BK)',
+    topic: 'Perencanaan Karier & Peta Jalan PTN SNBP/SNBT',
+    category: 'Pengembangan & P5',
+    teacher: 'Drs. M. Taufik, M.Psi',
+    room: 'Ruang BK / R.204',
+    jpWeekly: 1,
+    description: 'Pemetaan minat bakat RIASEC, strategi seleksi masuk Perguruan Tinggi Negeri, dan manajemen efikasi belajar.'
+  },
+  {
+    id: 'sub_p5',
+    courseId: 'course_p5',
+    name: 'Projek Penguatan Profil Pelajar Pancasila (P5)',
+    topic: 'Gaya Hidup Berkelanjutan & Ekosistem Sekolah',
+    category: 'Pengembangan & P5',
+    teacher: 'Tim Fasilitator P5',
+    room: 'Aula Sekolah & Lab Lingkungan',
+    jpWeekly: 2,
+    description: 'Inovasi komposter sampah organik, audit jejak karbon sekolah, dan pameran gelar karya terpadu.'
+  }
+];
+
+// Helper to look up courseId by synchronized subject name
+export const getCourseIdBySubjectName = (subjectName: string): string => {
+  const match = CENTRAL_SUBJECT_DATABASE.find(
+    (item) => item.name.toLowerCase() === subjectName.toLowerCase()
+  );
+  if (match) return match.courseId;
+  const s = subjectName.toLowerCase();
+  if (s.includes('kimia')) return 'course_kimia';
+  if (s.includes('fisika')) return 'course_fisika';
+  if (s.includes('biologi')) return 'course_bio';
+  if (s.includes('tingkat lanjut') || (s.includes('matematika') && s.includes('peminatan'))) return 'course_mat_pem';
+  if (s.includes('matematika wajib') || s.includes('matematika umum')) return 'course_mat_wajib';
+  if (s.includes('bahasa indonesia')) return 'course_bindo';
+  if (s.includes('bahasa inggris')) return 'course_bing';
+  if (s.includes('agama')) return 'course_agama';
+  if (s.includes('pancasila') || s.includes('ppkn')) return 'course_ppkn';
+  if (s.includes('sejarah')) return 'course_sejarah';
+  if (s.includes('seni')) return 'course_seni';
+  if (s.includes('pjok') || s.includes('olahraga')) return 'course_pjok';
+  if (s.includes('bk') || s.includes('konseling')) return 'course_bk';
+  if (s.includes('p5') || s.includes('projek')) return 'course_p5';
+  return 'course_kimia';
+};
+
+// =========================================================================
 // SCHEDULES PER ROLE (MIPA, IPS, GURU) - STANDAR KURIKULUM MERDEKA FASE F
 // 44 JP PER MINGGU (1 JP = 45 MENIT)
 // =========================================================================
+const BASE_MIPA_SCHEDULE_SENIN_TO_JUMAT: ScheduleItem[] = [
+  // Senin (Total 9 JP + Upacara + 2x Istirahat)
+  { id: 'sch_m_sen_0', day: 'Senin', time: '06.45 - 07.30', subject: 'Upacara Bendera & Pembiasaan Disiplin', teacher: 'Tim Kesiswaan SMAN 25', room: 'Lapangan Utama', status: 'Selesai', jp: 1, periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_sen_1', day: 'Senin', time: '07.30 - 09.00', subject: 'Fisika Peminatan', teacher: 'Ir. Ahmad Zulkarnain, S.Pd', room: 'Ruang R.204 / Lab Fisika', status: 'Selesai', jp: 2, periodRange: 'Jam Ke-1 s.d. 2', category: 'Peminatan MIPA' },
+  { id: 'sch_m_sen_2', day: 'Senin', time: '09.00 - 10.30', subject: 'Bahasa Indonesia', teacher: 'Ibu Dra. Sri Wahyuni, M.Pd', room: 'Ruang R.204', status: 'Berlangsung', jp: 2, periodRange: 'Jam Ke-3 s.d. 4', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_sen_break1', day: 'Senin', time: '10.30 - 10.50', subject: 'Istirahat I & Kudapan Sehat', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_sen_3', day: 'Senin', time: '10.50 - 11.35', subject: 'Bahasa Indonesia', teacher: 'Ibu Dra. Sri Wahyuni, M.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-5', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_sen_4', day: 'Senin', time: '11.35 - 12.20', subject: 'Matematika Tingkat Lanjut', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Peminatan MIPA' },
+  { id: 'sch_m_sen_break2', day: 'Senin', time: '12.20 - 13.05', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur & Makan Siang)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_sen_5', day: 'Senin', time: '13.05 - 14.35', subject: 'Matematika Tingkat Lanjut', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-7 s.d. 8', category: 'Peminatan MIPA' },
+  { id: 'sch_m_sen_6', day: 'Senin', time: '14.35 - 15.05', subject: 'Refleksi Pembelajaran & Literasi Mandiri', teacher: 'Wali Kelas XI MIPA 1', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-9', category: 'Pembiasaan & Istirahat' },
+
+  // Selasa (Total 9 JP: Kimia Peminatan 3 JP, Biologi Peminatan 2 JP, BK 1 JP, Matematika Wajib 3 JP)
+  { id: 'sch_m_sel_0', day: 'Selasa', time: '06.45 - 07.15', subject: 'Literasi Sains & Numerasi Pagi', teacher: 'Wali Kelas XI MIPA 1', room: 'Ruang R.204', status: 'Akan Datang', periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_sel_1', day: 'Selasa', time: '07.15 - 09.30', subject: 'Kimia Peminatan', teacher: 'Drs. Bambang Sudarsono, M.Si', room: 'Ruang R.204 / Lab Kimia', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Peminatan MIPA' },
+  { id: 'sch_m_sel_break1', day: 'Selasa', time: '09.30 - 09.50', subject: 'Istirahat I & Relaksasi', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_sel_2', day: 'Selasa', time: '09.50 - 11.20', subject: 'Biologi Peminatan', teacher: 'Ibu Endang Suryani, M.Si', room: 'Lab Biologi', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Peminatan MIPA' },
+  { id: 'sch_m_sel_3', day: 'Selasa', time: '11.20 - 12.05', subject: 'Bimbingan Konseling (BK)', teacher: 'Drs. M. Taufik, M.Psi', room: 'Ruang BK / R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Pengembangan & P5' },
+  { id: 'sch_m_sel_break2', day: 'Selasa', time: '12.05 - 12.50', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur Berjamaah)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_sel_4', day: 'Selasa', time: '12.50 - 15.05', subject: 'Matematika Wajib', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-7 s.d. 9', category: 'Mata Pelajaran Wajib' },
+
+  // Rabu (Total 9 JP: Biologi Peminatan 3 JP Praktikum, Matematika Tingkat Lanjut 2 JP, Bahasa Inggris 2 JP, Agama 2 JP)
+  { id: 'sch_m_rab_0', day: 'Rabu', time: '06.45 - 07.15', subject: 'Pembiasaan Karakter & Tadarus / Renungan Pagi', teacher: 'Pembina Rohis/Rohkris', room: 'Ruang R.204', status: 'Akan Datang', periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_rab_1', day: 'Rabu', time: '07.15 - 09.30', subject: 'Biologi Peminatan', teacher: 'Ibu Endang Suryani, M.Si', room: 'Lab Biologi Lt. 2', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Peminatan MIPA' },
+  { id: 'sch_m_rab_break1', day: 'Rabu', time: '09.30 - 09.50', subject: 'Istirahat I & Kudapan Sehat', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_rab_2', day: 'Rabu', time: '09.50 - 11.20', subject: 'Matematika Tingkat Lanjut', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Peminatan MIPA' },
+  { id: 'sch_m_rab_3', day: 'Rabu', time: '11.20 - 12.05', subject: 'Bahasa Inggris', teacher: 'Mr. David Siregar, M.Ed', room: 'Lab Bahasa', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_rab_break2', day: 'Rabu', time: '12.05 - 12.50', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur & Makan Siang)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_rab_4', day: 'Rabu', time: '12.50 - 13.35', subject: 'Bahasa Inggris', teacher: 'Mr. David Siregar, M.Ed', room: 'Lab Bahasa', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-7', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_rab_5', day: 'Rabu', time: '13.35 - 15.05', subject: 'Pendidikan Agama & Budi Pekerti', teacher: 'Ust. H. Syarifuddin, M.Ag', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-8 s.d. 9', category: 'Mata Pelajaran Wajib' },
+
+  // Kamis (Total 9 JP: Fisika Peminatan 3 JP Praktikum, Kimia Peminatan 2 JP Praktikum, Agama 1 JP, Sejarah 2 JP, Seni Budaya 1 JP)
+  { id: 'sch_m_kam_0', day: 'Kamis', time: '06.45 - 07.15', subject: 'English Morning Habit & Literasi Global', teacher: 'Guru Bahasa Inggris', room: 'Ruang R.204', status: 'Akan Datang', periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_kam_1', day: 'Kamis', time: '07.15 - 09.30', subject: 'Fisika Peminatan', teacher: 'Ir. Ahmad Zulkarnain, S.Pd', room: 'Lab Fisika Dasar', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Peminatan MIPA' },
+  { id: 'sch_m_kam_break1', day: 'Kamis', time: '09.30 - 09.50', subject: 'Istirahat I & Relaksasi', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_kam_2', day: 'Kamis', time: '09.50 - 11.20', subject: 'Kimia Peminatan', teacher: 'Drs. Bambang Sudarsono, M.Si', room: 'Lab Kimia Analitik', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Peminatan MIPA' },
+  { id: 'sch_m_kam_3', day: 'Kamis', time: '11.20 - 12.05', subject: 'Pendidikan Agama & Budi Pekerti', teacher: 'Ust. H. Syarifuddin, M.Ag', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_kam_break2', day: 'Kamis', time: '12.05 - 12.50', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur & Makan Siang)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_kam_4', day: 'Kamis', time: '12.50 - 14.20', subject: 'Sejarah Indonesia', teacher: 'Drs. Hendro Wibowo, M.Hum', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-7 s.d. 8', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_kam_5', day: 'Kamis', time: '14.20 - 15.05', subject: 'Pendidikan Seni & Budaya', teacher: 'Ibu Maya Lestari, S.Sn', room: 'Sanggar Seni & Desain', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-9', category: 'Mata Pelajaran Wajib' },
+
+  // Jumat (Total 8 JP: SKJ 1 JP, PJOK 3 JP, Pendidikan Pancasila 2 JP, P5 2 JP, Seni Budaya 1 JP)
+  { id: 'sch_m_jum_0', day: 'Jumat', time: '06.45 - 07.30', subject: 'Senam Kesegaran Jasmani (SKJ) & Pembiasaan Sehat', teacher: 'Tim PJOK & Kesiswaan', room: 'Lapangan Utama', status: 'Akan Datang', jp: 1, periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_jum_1', day: 'Jumat', time: '07.30 - 09.45', subject: 'PJOK', teacher: 'Wahyu Hidayat, S.Pd', room: 'GOR SMAN 25 & Lapangan Olahraga', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_jum_break1', day: 'Jumat', time: '09.45 - 10.05', subject: 'Istirahat I & Pemulihan Hidrasi', teacher: 'Piket Harian', room: 'Kantin & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_jum_2', day: 'Jumat', time: '10.05 - 11.35', subject: 'Pendidikan Pancasila', teacher: 'Ibu Siti Aminah, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Mata Pelajaran Wajib' },
+  { id: 'sch_m_jum_break2', day: 'Jumat', time: '11.35 - 13.00', subject: 'ISHOMA Sholat Jumat Berjamaah & Keputrian', teacher: 'Guru Pendamping & DKM', room: 'Masjid Al-Ikhlas & Aula', status: 'Akan Datang', isBreak: true, periodRange: '85 Menit', category: 'Pembiasaan & Istirahat' },
+  { id: 'sch_m_jum_3', day: 'Jumat', time: '13.00 - 14.30', subject: 'Projek Penguatan Profil Pelajar Pancasila (P5)', teacher: 'Tim Fasilitator P5', room: 'Aula Sekolah & Lab Lingkungan', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-6 s.d. 7', category: 'Pengembangan & P5' },
+  { id: 'sch_m_jum_4', day: 'Jumat', time: '14.30 - 15.15', subject: 'Pendidikan Seni & Budaya', teacher: 'Ibu Maya Lestari, S.Sn', room: 'Sanggar Seni & Desain', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-8', category: 'Mata Pelajaran Wajib' },
+];
+
 export const MOCK_SCHEDULE_BY_ROLE: Record<string, ScheduleItem[]> = {
-  siswa_mipa: [
-    // Senin (Total 9 JP + Upacara + 2x Istirahat)
-    { id: 'sch_m_sen_0', day: 'Senin', time: '06.45 - 07.30', subject: 'Upacara Bendera & Pembiasaan Disiplin', teacher: 'Tim Kesiswaan SMAN 25', room: 'Lapangan Utama', status: 'Selesai', jp: 1, periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_sen_1', day: 'Senin', time: '07.30 - 09.00', subject: 'Fisika Peminatan', teacher: 'Ir. Ahmad Zulkarnain, S.Pd', room: 'Ruang R.204 / Lab Fisika', status: 'Selesai', jp: 2, periodRange: 'Jam Ke-1 s.d. 2', category: 'Peminatan MIPA' },
-    { id: 'sch_m_sen_2', day: 'Senin', time: '09.00 - 10.30', subject: 'Bahasa Indonesia', teacher: 'Ibu Dra. Sri Wahyuni, M.Pd', room: 'Ruang R.204', status: 'Berlangsung', jp: 2, periodRange: 'Jam Ke-3 s.d. 4', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_sen_break1', day: 'Senin', time: '10.30 - 10.50', subject: 'Istirahat I & Kudapan Sehat', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_sen_3', day: 'Senin', time: '10.50 - 11.35', subject: 'Bahasa Indonesia', teacher: 'Ibu Dra. Sri Wahyuni, M.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-5', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_sen_4', day: 'Senin', time: '11.35 - 12.20', subject: 'Matematika Tingkat Lanjut', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Peminatan MIPA' },
-    { id: 'sch_m_sen_break2', day: 'Senin', time: '12.20 - 13.05', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur & Makan Siang)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_sen_5', day: 'Senin', time: '13.05 - 14.35', subject: 'Matematika Tingkat Lanjut', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-7 s.d. 8', category: 'Peminatan MIPA' },
-    { id: 'sch_m_sen_6', day: 'Senin', time: '14.35 - 15.05', subject: 'Refleksi Pembelajaran & Literasi Mandiri', teacher: 'Wali Kelas XI MIPA 1', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-9', category: 'Pengembangan & P5' },
-
-    // Selasa (Total 9 JP: Kimia 3 JP, Biologi 2 JP, BK 1 JP, Matematika Umum 3 JP)
-    { id: 'sch_m_sel_0', day: 'Selasa', time: '06.45 - 07.15', subject: 'Literasi Sains & Numerasi Pagi', teacher: 'Wali Kelas XI MIPA 1', room: 'Ruang R.204', status: 'Akan Datang', periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_sel_1', day: 'Selasa', time: '07.15 - 09.30', subject: 'Kimia Analitik', teacher: 'Drs. Bambang Sudarsono, M.Si', room: 'Ruang R.204 / Lab Kimia', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Peminatan MIPA' },
-    { id: 'sch_m_sel_break1', day: 'Selasa', time: '09.30 - 09.50', subject: 'Istirahat I & Relaksasi', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_sel_2', day: 'Selasa', time: '09.50 - 11.20', subject: 'Biologi Sel', teacher: 'Ibu Endang Suryani, M.Si', room: 'Lab Biologi', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Peminatan MIPA' },
-    { id: 'sch_m_sel_3', day: 'Selasa', time: '11.20 - 12.05', subject: 'Bimbingan Konseling (BK)', teacher: 'Drs. M. Taufik, M.Psi', room: 'Ruang BK / R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Pengembangan & P5' },
-    { id: 'sch_m_sel_break2', day: 'Selasa', time: '12.05 - 12.50', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur Berjamaah)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_sel_4', day: 'Selasa', time: '12.50 - 15.05', subject: 'Matematika Wajib', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-7 s.d. 9', category: 'Mata Pelajaran Wajib' },
-
-    // Rabu (Total 9 JP: Biologi 3 JP Praktikum, Matematika Peminatan 2 JP, Bahasa Inggris 2 JP, Agama 2 JP)
-    { id: 'sch_m_rab_0', day: 'Rabu', time: '06.45 - 07.15', subject: 'Pembiasaan Karakter & Tadarus / Renungan Pagi', teacher: 'Pembina Rohis/Rohkris', room: 'Ruang R.204', status: 'Akan Datang', periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_rab_1', day: 'Rabu', time: '07.15 - 09.30', subject: 'Biologi Sel', teacher: 'Ibu Endang Suryani, M.Si', room: 'Lab Biologi Lt. 2', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Peminatan MIPA' },
-    { id: 'sch_m_rab_break1', day: 'Rabu', time: '09.30 - 09.50', subject: 'Istirahat I & Kudapan Sehat', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_rab_2', day: 'Rabu', time: '09.50 - 11.20', subject: 'Matematika Tingkat Lanjut', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Peminatan MIPA' },
-    { id: 'sch_m_rab_3', day: 'Rabu', time: '11.20 - 12.05', subject: 'Bahasa Inggris', teacher: 'Mr. David Siregar, M.Ed', room: 'Lab Bahasa', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_rab_break2', day: 'Rabu', time: '12.05 - 12.50', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur & Makan Siang)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_rab_4', day: 'Rabu', time: '12.50 - 13.35', subject: 'Bahasa Inggris', teacher: 'Mr. David Siregar, M.Ed', room: 'Lab Bahasa', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-7', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_rab_5', day: 'Rabu', time: '13.35 - 15.05', subject: 'Pendidikan Agama & Budi Pekerti', teacher: 'Ust. H. Syarifuddin, M.Ag', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-8 s.d. 9', category: 'Mata Pelajaran Wajib' },
-
-    // Kamis (Total 9 JP: Fisika 3 JP Praktikum, Kimia 2 JP Praktikum, Agama 1 JP, Sejarah 2 JP, Seni Budaya 1 JP)
-    { id: 'sch_m_kam_0', day: 'Kamis', time: '06.45 - 07.15', subject: 'English Morning Habit & Literasi Global', teacher: 'Guru Bahasa Inggris', room: 'Ruang R.204', status: 'Akan Datang', periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_kam_1', day: 'Kamis', time: '07.15 - 09.30', subject: 'Fisika Peminatan', teacher: 'Ir. Ahmad Zulkarnain, S.Pd', room: 'Lab Fisika Dasar', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Peminatan MIPA' },
-    { id: 'sch_m_kam_break1', day: 'Kamis', time: '09.30 - 09.50', subject: 'Istirahat I & Relaksasi', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_kam_2', day: 'Kamis', time: '09.50 - 11.20', subject: 'Kimia Analitik', teacher: 'Drs. Bambang Sudarsono, M.Si', room: 'Lab Kimia Analitik', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Peminatan MIPA' },
-    { id: 'sch_m_kam_3', day: 'Kamis', time: '11.20 - 12.05', subject: 'Pendidikan Agama & Budi Pekerti', teacher: 'Ust. H. Syarifuddin, M.Ag', room: 'Ruang R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_kam_break2', day: 'Kamis', time: '12.05 - 12.50', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur & Makan Siang)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_kam_4', day: 'Kamis', time: '12.50 - 14.20', subject: 'Sejarah Indonesia', teacher: 'Drs. Hendro Wibowo, M.Hum', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-7 s.d. 8', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_kam_5', day: 'Kamis', time: '14.20 - 15.05', subject: 'Pendidikan Seni & Budaya', teacher: 'Ibu Maya Lestari, S.Sn', room: 'Sanggar Seni & Desain', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-9', category: 'Mata Pelajaran Wajib' },
-
-    // Jumat (Total 8 JP: SKJ 1 JP, PJOK 3 JP, Pancasila 2 JP, P5 2 JP, Seni Budaya 1 JP)
-    { id: 'sch_m_jum_0', day: 'Jumat', time: '06.45 - 07.30', subject: 'Senam Kesegaran Jasmani (SKJ) & Pembiasaan Sehat', teacher: 'Tim PJOK & Kesiswaan', room: 'Lapangan Utama', status: 'Akan Datang', jp: 1, periodRange: 'Pembiasaan', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_jum_1', day: 'Jumat', time: '07.30 - 09.45', subject: 'PJOK', teacher: 'Wahyu Hidayat, S.Pd', room: 'GOR SMAN 25 & Lapangan Olahraga', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_jum_break1', day: 'Jumat', time: '09.45 - 10.05', subject: 'Istirahat I & Pemulihan Hidrasi', teacher: 'Piket Harian', room: 'Kantin & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_jum_2', day: 'Jumat', time: '10.05 - 11.35', subject: 'Pendidikan Pancasila', teacher: 'Ibu Siti Aminah, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Mata Pelajaran Wajib' },
-    { id: 'sch_m_jum_break2', day: 'Jumat', time: '11.35 - 13.00', subject: 'ISHOMA Sholat Jumat Berjamaah & Keputrian', teacher: 'Guru Pendamping & DKM', room: 'Masjid Al-Ikhlas & Aula', status: 'Akan Datang', isBreak: true, periodRange: '85 Menit', category: 'Pembiasaan & Istirahat' },
-    { id: 'sch_m_jum_3', day: 'Jumat', time: '13.00 - 14.30', subject: 'Projek Penguatan P5', teacher: 'Tim Fasilitator P5', room: 'Aula Sekolah & Lab Lingkungan', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-6 s.d. 7', category: 'Pengembangan & P5' },
-    { id: 'sch_m_jum_4', day: 'Jumat', time: '14.30 - 15.15', subject: 'Pendidikan Seni & Budaya', teacher: 'Ibu Maya Lestari, S.Sn', room: 'Sanggar Seni & Desain', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-8', category: 'Mata Pelajaran Wajib' },
-  ],
+  siswa_mipa: BASE_MIPA_SCHEDULE_SENIN_TO_JUMAT,
+  siswa_mipa_1: BASE_MIPA_SCHEDULE_SENIN_TO_JUMAT.map((item) => ({
+    ...item,
+    id: item.id.replace('sch_m_', 'sch_m1_'),
+    room: item.room.includes('R.204') ? item.room : item.room.replace('Ruang R.', 'Ruang R.204')
+  })),
+  siswa_mipa_2: BASE_MIPA_SCHEDULE_SENIN_TO_JUMAT.map((item) => ({
+    ...item,
+    id: item.id.replace('sch_m_', 'sch_m2_'),
+    room: item.room.replace('R.204', 'R.205')
+  })),
 
   siswa_ips: [
     // Senin
@@ -3983,8 +4205,8 @@ export const MOCK_EXAMS_BY_ROLE: Record<string, ExamItem[]> = {
     },
     {
       id: 'exam_m2',
-      title: 'PTS Matematika Peminatan 11 MIPA',
-      subject: 'Matematika Peminatan',
+      title: 'PTS Matematika Tingkat Lanjut 11 MIPA',
+      subject: 'Matematika Tingkat Lanjut',
       type: 'PTS',
       targetClass: '11 MIPA 1 & 2',
       dateStr: 'Rabu, 11 Nov 2026',
@@ -3997,8 +4219,8 @@ export const MOCK_EXAMS_BY_ROLE: Record<string, ExamItem[]> = {
     },
     {
       id: 'exam_m3',
-      title: 'PAS Kimia Analitik & Larutan Asam Basa',
-      subject: 'Kimia Analitik',
+      title: 'PAS Kimia Peminatan & Larutan Asam Basa',
+      subject: 'Kimia Peminatan',
       type: 'PAS',
       targetClass: '11 MIPA 2',
       dateStr: 'Kamis, 12 Nov 2026',
@@ -4110,7 +4332,7 @@ export const MOCK_ASSIGNMENTS_BY_ROLE: Record<string, AssignmentItem[]> = {
     {
       id: 'asg_m1',
       title: 'Laporan Praktikum Titrasi Asam Basa & Penentuan Titik Ekuivalen',
-      subject: 'Kimia Analitik 11 MIPA',
+      subject: 'Kimia Peminatan',
       dueDate: 'Besok, 23.59 WIB',
       status: 'Belum Dikumpulkan',
       maxScore: 100,
@@ -4119,7 +4341,7 @@ export const MOCK_ASSIGNMENTS_BY_ROLE: Record<string, AssignmentItem[]> = {
     {
       id: 'asg_m2',
       title: 'Analisis Gerak Balok Bidang Miring & Koefisien Gaya Gesek',
-      subject: 'Fisika Peminatan 11 MIPA',
+      subject: 'Fisika Peminatan',
       dueDate: 'Kemarin, 18.00 WIB',
       status: 'Dinilai',
       score: 96,
@@ -4147,7 +4369,7 @@ export const MOCK_ASSIGNMENTS_BY_ROLE: Record<string, AssignmentItem[]> = {
     {
       id: 'asg_m4',
       title: 'Problem Set Kalkulus: Garis Singgung Kurva Trigonometri',
-      subject: 'Matematika Peminatan',
+      subject: 'Matematika Tingkat Lanjut',
       dueDate: '3 Hari Lagi, 23.59 WIB',
       status: 'Belum Dikumpulkan',
       maxScore: 100,
@@ -4156,7 +4378,7 @@ export const MOCK_ASSIGNMENTS_BY_ROLE: Record<string, AssignmentItem[]> = {
     {
       id: 'asg_m5',
       title: 'Analisis Hereditas Mendel & Pembuatan Diagram Punnett Dihibrid',
-      subject: 'Biologi Sel',
+      subject: 'Biologi Peminatan',
       dueDate: '5 Hari Lagi, 17.00 WIB',
       status: 'Belum Dikumpulkan',
       maxScore: 100,
@@ -4247,7 +4469,7 @@ export const MOCK_AGENDAS_BY_ROLE: Record<string, AgendaItem[]> = {
   siswa_mipa: [
     {
       id: 'ag_m1',
-      title: 'PTS Matematika Peminatan 11 MIPA',
+      title: 'PTS Matematika Tingkat Lanjut 11 MIPA',
       category: 'Ujian',
       time: '07.00 - 10.00',
       date: '9 November 2026',
@@ -4331,7 +4553,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   // --- SMA MIPA ---
   {
     id: 'course_kimia',
-    name: 'Kimia Analitik: Titrasi & pH Larutan',
+    name: 'Kimia Peminatan',
+    topic: 'Titrasi Asam Basa & pH Larutan',
     category: 'SMA MIPA',
     scheduleGroup: 'Peminatan',
     teacher: 'Drs. Bambang Sudarsono, M.Si',
@@ -4349,7 +4572,7 @@ export const MOCK_COURSES: SubjectCourse[] = [
         duration: '18 Menit', 
         completed: true,
         videoUrl: '/videos/lesson_video_2.mp4',
-        teacherVoiceScript: 'Halo siswa SMAN 25 Jakarta. Pada pertemuan kimia analitik kali ini, kita mempelajari konsep fundamental asam basa Arrhenius yang melepaskan ion hidrogen dan teori Bronsted Lowry tentang donor dan akseptor pasangan proton. Perhatikan stoikiometri netralisasi pada larutan HCl dan NaOH.',
+        teacherVoiceScript: 'Halo siswa SMAN 25 Jakarta. Pada pertemuan Kimia Peminatan kali ini, kita mempelajari konsep fundamental asam basa Arrhenius yang melepaskan ion hidrogen dan teori Bronsted Lowry tentang donor dan akseptor pasangan proton. Perhatikan stoikiometri netralisasi pada larutan HCl dan NaOH.',
         keyPoints: ['Asam mendonorkan proton H+', 'Basa menerima proton H+', 'Reaksi netralisasi menghasilkan garam dan molekul air']
       },
       { 
@@ -4381,7 +4604,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_fisika',
-    name: 'Fisika Dinamika: Hukum Newton & Bidang Miring',
+    name: 'Fisika Peminatan',
+    topic: 'Hukum Newton & Dinamika Gerak',
     category: 'SMA MIPA',
     scheduleGroup: 'Peminatan',
     teacher: 'Ir. Ahmad Zulkarnain, S.Pd',
@@ -4399,7 +4623,7 @@ export const MOCK_COURSES: SubjectCourse[] = [
         duration: '20 Menit', 
         completed: true,
         videoUrl: '/videos/lesson_video_1.mp4',
-        teacherVoiceScript: 'Selamat pagi siswa kelas 11 MIPA. Hari ini pada pelajaran Fisika Dinamika, kita membedah Hukum Kedua Newton Sigma F sama dengan massa kali percepatan. Amatilah vektor gaya berat, gaya normal tegak lurus bidang, dan gaya gesek kinetis yang menahan laju balok pada kemiringan teta.',
+        teacherVoiceScript: 'Selamat pagi siswa kelas 11 MIPA. Hari ini pada pelajaran Fisika Peminatan, kita membedah Hukum Kedua Newton Sigma F sama dengan massa kali percepatan. Amatilah vektor gaya berat, gaya normal tegak lurus bidang, dan gaya gesek kinetis yang menahan laju balok pada kemiringan teta.',
         keyPoints: ['Gaya normal N = m dikali g dikali cosinus sudut teta', 'Gaya penarik sejajar bidang = m dikali g dikali sinus teta', 'Gaya gesek kinetis = koefisien mu k dikali gaya normal']
       },
       { 
@@ -4429,7 +4653,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_bio',
-    name: 'Biologi: Metabolisme Sel & Pola Pewarisan Sifat',
+    name: 'Biologi Peminatan',
+    topic: 'Metabolisme Sel & Pola Pewarisan Sifat',
     category: 'SMA MIPA',
     scheduleGroup: 'Peminatan',
     teacher: 'Ibu Endang Suryani, M.Si',
@@ -4447,7 +4672,7 @@ export const MOCK_COURSES: SubjectCourse[] = [
         duration: '22 Menit', 
         completed: true,
         videoUrl: '/videos/lesson_video_2.mp4',
-        teacherVoiceScript: 'Halo semuanya, selamat datang di kelas Biologi Sel SMAN 25 Jakarta. Materi ini menjelaskan bagaimana mitokondria berperan sebagai pabrik energi seluler yang memecah glukosa menjadi adenosin trifosfat melalui respirasi aerob.',
+        teacherVoiceScript: 'Halo semuanya, selamat datang di kelas Biologi Peminatan SMAN 25 Jakarta. Materi ini menjelaskan bagaimana mitokondria berperan sebagai pabrik energi seluler yang memecah glukosa menjadi adenosin trifosfat melalui respirasi aerob.',
         keyPoints: ['Glikolisis berlangsung di sitoplasma sel', 'Siklus Krebs menghasilkan NADH dan FADH2 di matriks mitokondria', 'Transpor elektron menghasilkan energi ATP terbanyak']
       },
       { 
@@ -4478,7 +4703,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_mat_pem',
-    name: 'Matematika Peminatan: Kalkulus & Polinomial',
+    name: 'Matematika Tingkat Lanjut',
+    topic: 'Kalkulus Lanjut & Polinomial',
     category: 'SMA MIPA',
     scheduleGroup: 'Peminatan',
     teacher: 'Ibu Ratna Dewi, S.Pd',
@@ -4496,7 +4722,7 @@ export const MOCK_COURSES: SubjectCourse[] = [
         duration: '24 Menit', 
         completed: true,
         videoUrl: '/videos/lesson_video_1.mp4',
-        teacherVoiceScript: 'Selamat pagi siswa kelas 11 MIPA. Pada modul kalkulus ini, kita menyelesaikan bentuk limit x menuju nol dari sin a x per b x yang menghasilkan perbandingan koefisien a per b.',
+        teacherVoiceScript: 'Selamat pagi siswa kelas 11 MIPA. Pada modul Matematika Tingkat Lanjut ini, kita menyelesaikan bentuk limit x menuju nol dari sin a x per b x yang menghasilkan perbandingan koefisien a per b.',
         keyPoints: ['Sifat dasar limit trigonometri', 'Penerapan aturan L Hospital jika bentuk tak tentu nol per nol']
       },
       { 
@@ -4527,7 +4753,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_sejarah',
-    name: 'Sejarah Indonesia: Kebangkitan Nasional 1928',
+    name: 'Sejarah Indonesia',
+    topic: 'Kebangkitan Nasional 1928',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Drs. Hendro Wibowo, M.Hum',
@@ -4578,7 +4805,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   // --- MATA PELAJARAN UMUM & WAJIB (ADA DI JADWAL SEMUA SISWA) ---
   {
     id: 'course_bindo',
-    name: 'Bahasa Indonesia: Teks Argumentasi & Kritik Sastra',
+    name: 'Bahasa Indonesia',
+    topic: 'Teks Argumentasi & Kritik Sastra',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Ibu Dra. Sri Wahyuni, M.Pd',
@@ -4627,7 +4855,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_bing',
-    name: 'Bahasa Inggris: Analytical Exposition & Debating',
+    name: 'Bahasa Inggris',
+    topic: 'Analytical Exposition & Debating',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Mr. David Siregar, M.Ed',
@@ -4669,7 +4898,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_mat_wajib',
-    name: 'Matematika Wajib: Transformasi Geometri & Statistika',
+    name: 'Matematika Wajib',
+    topic: 'Transformasi Geometri & Statistika Data Kelompok',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Ibu Ratna Dewi, S.Pd',
@@ -4718,7 +4948,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_agama',
-    name: 'Pendidikan Agama & Budi Pekerti: Fiqih Muamalah & Karakter',
+    name: 'Pendidikan Agama & Budi Pekerti',
+    topic: 'Fiqih Muamalah & Karakter Mulia',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Ust. H. Syarifuddin, M.Ag',
@@ -4757,7 +4988,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_ppkn',
-    name: 'Pendidikan Pancasila: Supremasi Hukum & Konstitusi',
+    name: 'Pendidikan Pancasila',
+    topic: 'Supremasi Hukum & Konstitusi UUD 1945',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Ibu Siti Aminah, S.Pd',
@@ -4799,7 +5031,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_pjok',
-    name: 'Pendidikan Jasmani, Olahraga & Kesehatan (PJOK)',
+    name: 'PJOK',
+    topic: 'Kebugaran Jasmani & Senam Atletik',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Wahyu Hidayat, S.Pd',
@@ -4841,7 +5074,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   },
   {
     id: 'course_seni',
-    name: 'Pendidikan Seni & Budaya: Rupa & Musik Nusantara',
+    name: 'Pendidikan Seni & Budaya',
+    topic: 'Rupa & Musik Nusantara',
     category: 'Umum',
     scheduleGroup: 'Wajib',
     teacher: 'Ibu Maya Lestari, S.Sn',
@@ -4885,7 +5119,8 @@ export const MOCK_COURSES: SubjectCourse[] = [
   // --- PENGEMBANGAN DIRI, BK, P5 & RISET (ADA DI JADWAL) ---
   {
     id: 'course_bk',
-    name: 'Bimbingan Konseling (BK): Perencanaan Karier & PTN',
+    name: 'Bimbingan Konseling (BK)',
+    topic: 'Perencanaan Karier & PTN',
     category: 'Pengembangan',
     scheduleGroup: 'Pengembangan',
     teacher: 'Drs. M. Taufik, M.Psi',
@@ -4925,6 +5160,7 @@ export const MOCK_COURSES: SubjectCourse[] = [
   {
     id: 'course_p5',
     name: 'Projek Penguatan Profil Pelajar Pancasila (P5)',
+    topic: 'Gaya Hidup Berkelanjutan & Ekosistem',
     category: 'Pengembangan',
     scheduleGroup: 'Pengembangan',
     teacher: 'Fasilitator Kurikulum',

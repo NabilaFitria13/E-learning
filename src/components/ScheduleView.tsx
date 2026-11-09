@@ -17,25 +17,100 @@ import {
   Sparkles,
   Search,
   Grid,
-  List
+  List,
+  Play
 } from 'lucide-react';
 import { ScheduleItem, UserProfile } from '../types';
-import { MOCK_SCHEDULE_BY_ROLE, resolveModulAjar } from '../data/mockData';
+import { 
+  MOCK_SCHEDULE_BY_ROLE, 
+  resolveModulAjar, 
+  getCourseIdBySubjectName,
+  CENTRAL_SUBJECT_DATABASE 
+} from '../data/mockData';
+
+/**
+ * Helper to determine whether a schedule item is an active academic lesson
+ * (which should display 'Silabus & Video' and 'Baca Materi Pelajaran' buttons),
+ * or a non-academic / pembiasaan / upacara / istirahat session (where buttons must be hidden).
+ */
+export const isAcademicScheduleItem = (item: {
+  subject: string;
+  category?: string;
+  isBreak?: boolean;
+  periodRange?: string;
+}): boolean => {
+  if (item.isBreak) return false;
+
+  const cat = (item.category || '').toLowerCase();
+  if (
+    cat.includes('pembiasaan') ||
+    cat.includes('istirahat') ||
+    cat.includes('non-akademik') ||
+    cat.includes('kegiatan')
+  ) {
+    return false;
+  }
+
+  const range = (item.periodRange || '').toLowerCase();
+  if (range.includes('pembiasaan') || range.includes('istirahat')) {
+    return false;
+  }
+
+  const subj = (item.subject || '').toLowerCase();
+  const nonAcademicKeywords = [
+    'upacara',
+    'pembiasaan',
+    'istirahat',
+    'ishoma',
+    'senam',
+    'morning habit',
+    'literasi sains & numerasi',
+    'literasi pagi',
+    'literasi mandiri',
+    'refleksi pembelajaran',
+    'tadarus',
+    'renungan',
+    'apel bendera',
+    'apel pagi',
+    'rapat dewan',
+    'koordinasi mgmp',
+    'pemeriksaan & penilaian',
+    'verifikasi presensi',
+    'penyusunan modul',
+    'pengawasan ujian',
+    'konsultasi belajar',
+    'input nilai'
+  ];
+
+  if (nonAcademicKeywords.some((kw) => subj.includes(kw))) {
+    return false;
+  }
+
+  return true;
+};
 
 interface ScheduleViewProps {
   currentUser: UserProfile;
   onOpenModulAjar: (subject: string) => void;
+  onNavigateToCourse?: (courseId: string, subjectName?: string) => void;
 }
 
 export const ScheduleView: React.FC<ScheduleViewProps> = ({ 
   currentUser,
-  onOpenModulAjar 
+  onOpenModulAjar,
+  onNavigateToCourse
 }) => {
   const [selectedDay, setSelectedDay] = useState<'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat'>('Senin');
   const [viewMode, setViewMode] = useState<'harian' | 'matriks'>('harian');
   const [filterCategory, setFilterCategory] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showJpBreakdown, setShowJpBreakdown] = useState<boolean>(false);
+
+  const isStudentMipa = currentUser.role === 'siswa_mipa' || (!currentUser.role.includes('guru') && !currentUser.role.includes('ips'));
+  const [selectedClass, setSelectedClass] = useState<'XI MIPA 1' | 'XI MIPA 2'>(() => {
+    if (currentUser.className?.includes('MIPA 2')) return 'XI MIPA 2';
+    return 'XI MIPA 1';
+  });
 
   const days: ('Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat')[] = [
     'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'
@@ -52,42 +127,44 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
     Senin: {
       totalJp: 9,
       hours: '06.45 - 15.05 WIB',
-      focus: 'Fisika Peminatan (2 JP), Bahasa Indonesia (3 JP), Matematika Peminatan (3 JP)',
+      focus: 'Fisika Peminatan (2 JP), Bahasa Indonesia (3 JP), Matematika Tingkat Lanjut (3 JP)',
       highlight: 'Upacara Bendera Pukul 06.45 WIB di Lapangan Utama',
       breakSummary: 'Istirahat I (10.30 - 10.50 WIB) & ISHOMA (12.20 - 13.05 WIB)'
     },
     Selasa: {
       totalJp: 9,
       hours: '06.45 - 15.05 WIB',
-      focus: 'Kimia Analitik (3 JP), Biologi Sel (2 JP), BK (1 JP), Matematika Wajib (3 JP)',
-      highlight: 'Praktikum Kimia Analitik di Lab Kimia Pagi Hari',
+      focus: 'Kimia Peminatan (3 JP), Biologi Peminatan (2 JP), Bimbingan Konseling (BK) (1 JP), Matematika Wajib (3 JP)',
+      highlight: 'Praktikum Kimia Peminatan di Lab Kimia Terpadu Pagi Hari',
       breakSummary: 'Istirahat I (09.30 - 09.50 WIB) & ISHOMA (12.05 - 12.50 WIB)'
     },
     Rabu: {
       totalJp: 9,
       hours: '06.45 - 15.05 WIB',
-      focus: 'Biologi Sel (3 JP Lab), Matematika Peminatan (2 JP), B. Inggris (2 JP), Agama (2 JP)',
-      highlight: 'Praktikum Mikroskop Biologi Sel di Lab Biologi Lantai 2',
+      focus: 'Biologi Peminatan (3 JP Lab), Matematika Tingkat Lanjut (2 JP), Bahasa Inggris (2 JP), Pendidikan Agama & Budi Pekerti (2 JP)',
+      highlight: 'Praktikum Mikroskop Biologi Peminatan di Lab Biologi Lantai 2',
       breakSummary: 'Istirahat I (09.30 - 09.50 WIB) & ISHOMA (12.05 - 12.50 WIB)'
     },
     Kamis: {
       totalJp: 9,
       hours: '06.45 - 15.05 WIB',
-      focus: 'Fisika Peminatan (3 JP Lab), Kimia Analitik (2 JP Lab), Agama (1 JP), Sejarah (2 JP), Seni (1 JP)',
+      focus: 'Fisika Peminatan (3 JP Lab), Kimia Peminatan (2 JP Lab), Pendidikan Agama & Budi Pekerti (1 JP), Sejarah Indonesia (2 JP), Pendidikan Seni & Budaya (1 JP)',
       highlight: 'Eksperimen Dinamika Gerak Newton di Lab Fisika Dasar',
       breakSummary: 'Istirahat I (09.30 - 09.50 WIB) & ISHOMA (12.05 - 12.50 WIB)'
     },
     Jumat: {
       totalJp: 8,
       hours: '06.45 - 15.15 WIB',
-      focus: 'SKJ (1 JP), PJOK (3 JP), Pendidikan Pancasila (2 JP), Projek P5 (2 JP), Seni (1 JP)',
+      focus: 'SKJ (1 JP), PJOK (3 JP), Pendidikan Pancasila (2 JP), Projek Penguatan Profil Pelajar Pancasila (P5) (2 JP), Pendidikan Seni & Budaya (1 JP)',
       highlight: 'Senam Pagi SKJ & Sholat Jumat Berjamaah di Masjid Al-Ikhlas',
       breakSummary: 'Istirahat I (09.45 - 10.05 WIB) & ISHOMA Jumat (11.35 - 13.00 WIB)'
     }
   };
 
-  // Retrieve schedule list specifically for this user role
-  const userFullSchedule = MOCK_SCHEDULE_BY_ROLE[currentUser.role] || MOCK_SCHEDULE_BY_ROLE['siswa_mipa'];
+  // Retrieve schedule list specifically for this user role / class
+  const userFullSchedule = isStudentMipa
+    ? (selectedClass === 'XI MIPA 2' ? MOCK_SCHEDULE_BY_ROLE['siswa_mipa_2'] : MOCK_SCHEDULE_BY_ROLE['siswa_mipa_1']) || MOCK_SCHEDULE_BY_ROLE['siswa_mipa']
+    : MOCK_SCHEDULE_BY_ROLE[currentUser.role] || MOCK_SCHEDULE_BY_ROLE['siswa_mipa'];
   
   // Filter for the selected day
   const currentDaySchedule = userFullSchedule
@@ -97,7 +174,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
       if (filterCategory === 'Peminatan MIPA') return item.category === 'Peminatan MIPA';
       if (filterCategory === 'Wajib') return item.category === 'Mata Pelajaran Wajib';
       if (filterCategory === 'P5 & BK') return item.category === 'Pengembangan & P5';
-      if (filterCategory === 'Istirahat') return item.isBreak;
+      if (filterCategory === 'Istirahat') return item.isBreak || !isAcademicScheduleItem(item) || item.category === 'Pembiasaan & Istirahat';
       return true;
     })
     .filter((item) => {
@@ -141,9 +218,37 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
               Terbagi Rapi Per Hari
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
-            Jadwal Pelajaran {currentUser.className}
-          </h2>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+              Jadwal Pelajaran {isStudentMipa ? `Kelas ${selectedClass}` : currentUser.className}
+            </h2>
+            {isStudentMipa && (
+              <div className="flex items-center gap-1 p-0.5 bg-slate-200/90 rounded-lg text-xs font-bold ml-1">
+                <button
+                  type="button"
+                  onClick={() => setSelectedClass('XI MIPA 1')}
+                  className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                    selectedClass === 'XI MIPA 1'
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  XI MIPA 1
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedClass('XI MIPA 2')}
+                  className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                    selectedClass === 'XI MIPA 2'
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  XI MIPA 2
+                </button>
+              </div>
+            )}
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Struktur jadwal resmi terbagi per hari (Senin s.d. Jumat): 20 JP Peminatan MIPA, 20 JP Mapel Umum Wajib, dan 4 JP Projek P5 & BK.
           </p>
@@ -225,8 +330,8 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                 </div>
                 <ul className="space-y-1 text-slate-600 text-[11px]">
                   <li className="flex justify-between"><span>• Fisika Peminatan</span><strong className="text-slate-900">5 JP / Minggu</strong></li>
-                  <li className="flex justify-between"><span>• Kimia Analitik</span><strong className="text-slate-900">5 JP / Minggu</strong></li>
-                  <li className="flex justify-between"><span>• Biologi Sel</span><strong className="text-slate-900">5 JP / Minggu</strong></li>
+                  <li className="flex justify-between"><span>• Kimia Peminatan</span><strong className="text-slate-900">5 JP / Minggu</strong></li>
+                  <li className="flex justify-between"><span>• Biologi Peminatan</span><strong className="text-slate-900">5 JP / Minggu</strong></li>
                   <li className="flex justify-between"><span>• Matematika Tingkat Lanjut</span><strong className="text-slate-900">5 JP / Minggu</strong></li>
                 </ul>
               </div>
@@ -238,14 +343,14 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                   <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Fondasi Akademik</span>
                 </div>
                 <ul className="space-y-1 text-slate-600 text-[11px]">
-                  <li className="flex justify-between"><span>• Matematika Umum</span><strong className="text-slate-900">3 JP / Minggu</strong></li>
+                  <li className="flex justify-between"><span>• Matematika Wajib</span><strong className="text-slate-900">3 JP / Minggu</strong></li>
                   <li className="flex justify-between"><span>• Bahasa Indonesia</span><strong className="text-slate-900">3 JP / Minggu</strong></li>
-                  <li className="flex justify-between"><span>• Pend. Agama & Budi Pekerti</span><strong className="text-slate-900">3 JP / Minggu</strong></li>
+                  <li className="flex justify-between"><span>• Pendidikan Agama & Budi Pekerti</span><strong className="text-slate-900">3 JP / Minggu</strong></li>
                   <li className="flex justify-between"><span>• PJOK</span><strong className="text-slate-900">3 JP / Minggu</strong></li>
                   <li className="flex justify-between"><span>• Bahasa Inggris</span><strong className="text-slate-900">2 JP / Minggu</strong></li>
                   <li className="flex justify-between"><span>• Pendidikan Pancasila</span><strong className="text-slate-900">2 JP / Minggu</strong></li>
                   <li className="flex justify-between"><span>• Sejarah Indonesia</span><strong className="text-slate-900">2 JP / Minggu</strong></li>
-                  <li className="flex justify-between"><span>• Seni Budaya</span><strong className="text-slate-900">2 JP / Minggu</strong></li>
+                  <li className="flex justify-between"><span>• Pendidikan Seni & Budaya</span><strong className="text-slate-900">2 JP / Minggu</strong></li>
                 </ul>
               </div>
 
@@ -256,8 +361,8 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                   <span className="text-[10px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded">Karakter & Karier</span>
                 </div>
                 <ul className="space-y-1 text-slate-600 text-[11px]">
-                  <li className="flex justify-between"><span>• Projek Penguatan P5</span><strong className="text-slate-900">3 JP / Minggu</strong></li>
-                  <li className="flex justify-between"><span>• Bimbingan Konseling (BK PTN)</span><strong className="text-slate-900">1 JP / Minggu</strong></li>
+                  <li className="flex justify-between"><span>• Projek Penguatan Profil Pelajar Pancasila (P5)</span><strong className="text-slate-900">2 JP / Minggu</strong></li>
+                  <li className="flex justify-between"><span>• Bimbingan Konseling (BK)</span><strong className="text-slate-900">1 JP / Minggu</strong></li>
                   <li className="flex justify-between"><span>• Pembiasaan Karakter & Literasi</span><strong className="text-slate-900">Tiap Pagi 06.45</strong></li>
                 </ul>
               </div>
@@ -386,7 +491,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                 { id: 'Peminatan MIPA', label: 'Peminatan Sains MIPA (5 JP)' },
                 { id: 'Wajib', label: 'Mata Pelajaran Wajib' },
                 { id: 'P5 & BK', label: 'Projek P5 & Konseling BK' },
-                { id: 'Istirahat', label: 'Jeda Istirahat' },
+                { id: 'Istirahat', label: 'Pembiasaan & Istirahat' },
               ].map((f) => (
                 <button
                   key={f.id}
@@ -459,7 +564,75 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                   );
                 }
 
-                // ACADEMIC LESSON CARD
+                const isAcademic = isAcademicScheduleItem(item);
+
+                // SPECIAL RENDER: Non-Academic Session (Pembiasaan, Upacara, Senam, Literasi Pagi, dll.)
+                // Sembunyikan sepenuhnya tombol "Silabus & Video" dan "Baca Materi Pelajaran"
+                if (!isAcademic) {
+                  return (
+                    <div
+                      key={item.id}
+                      className={`p-4 sm:p-4.5 rounded-2xl border border-dashed border-slate-300 bg-gradient-to-r from-slate-50 via-amber-50/20 to-slate-50/80 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
+                        isOngoing ? 'ring-2 ring-amber-300 border-amber-400 bg-amber-50/40' : ''
+                      }`}
+                    >
+                      {/* Left Side: Time, Badge, Activity & Pengampu */}
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="px-3 py-2.5 rounded-xl text-xs font-mono font-bold flex flex-col items-center justify-center shrink-0 min-w-[110px] bg-slate-100 border border-slate-200 text-slate-700">
+                          <Clock className="w-4 h-4 mb-1 text-slate-500 opacity-90" />
+                          <span className="tracking-tight">{item.time}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded mt-1 font-sans font-semibold bg-slate-200 text-slate-700">
+                            {item.periodRange || 'Pembiasaan'}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200 font-mono">
+                              Sesi Pembiasaan Karakter
+                            </span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                isOngoing
+                                  ? 'bg-amber-200 text-amber-900 animate-pulse'
+                                  : isFinished
+                                  ? 'bg-slate-100 text-slate-600'
+                                  : 'bg-slate-200 text-slate-700'
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-slate-900 text-base leading-snug">
+                            {item.subject}
+                          </h3>
+
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <User className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-slate-700 font-medium">Pengampu: {item.teacher}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-slate-600">Lokasi: {item.room}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Side: Informative label only without any learning action buttons */}
+                      <div className="pt-2 md:pt-0 shrink-0 self-start md:self-auto">
+                        <span className="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-2xs">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Kegiatan Non-Pelajaran</span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // ACADEMIC LESSON CARD (Hanya mata pelajaran akademik aktif dengan tombol materi)
                 return (
                   <div
                     key={item.id}
@@ -543,14 +716,30 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Right Side: Modul Ajar Direct Reading Action */}
-                    <div className="flex items-center gap-2 pt-2 md:pt-0 shrink-0">
+                    {/* Right Side: Dual Direct Actions (Silabus & Video + Baca Modul Ajar) */}
+                    <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0 shrink-0">
+                      <button
+                        onClick={() => {
+                          const courseId = getCourseIdBySubjectName(item.subject);
+                          if (onNavigateToCourse) {
+                            onNavigateToCourse(courseId, item.subject);
+                          } else {
+                            onOpenModulAjar(item.subject);
+                          }
+                        }}
+                        className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs bg-gradient-to-r from-sky-600 via-[#0284c7] to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white cursor-pointer active:scale-95"
+                        title={`Buka Silabus Interaktif & Video Pembelajaran: ${item.subject}`}
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Silabus & Video</span>
+                      </button>
+
                       <button
                         onClick={() => onOpenModulAjar(item.subject)}
-                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 cursor-pointer active:scale-95"
+                        className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 cursor-pointer active:scale-95"
                         title={`Buka Modul Ajar Lengkap: ${item.subject} (${modul.title})`}
                       >
-                        <BookOpen className="w-4 h-4 text-slate-950" />
+                        <BookOpen className="w-3.5 h-3.5 text-slate-950" />
                         <span>Baca Materi Pelajaran</span>
                       </button>
                     </div>
@@ -625,16 +814,51 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                           );
                         }
 
+                        const isLessonAcademic = isAcademicScheduleItem(lesson);
+
+                        if (!isLessonAcademic) {
+                          return (
+                            <div
+                              key={lesson.id}
+                              className="p-1.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 text-left space-y-0.5"
+                              title={`Sesi Non-Akademik: ${lesson.subject}`}
+                            >
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="font-mono text-slate-400">{lesson.time.split(' - ')[0]}</span>
+                                <span className="font-bold text-slate-500 text-[8px] bg-slate-200 px-1 rounded">
+                                  Pembiasaan
+                                </span>
+                              </div>
+                              <div className="font-medium text-slate-700 text-xs truncate">
+                                {lesson.subject}
+                              </div>
+                              <div className="text-[10px] text-slate-400 truncate">
+                                {lesson.room}
+                              </div>
+                            </div>
+                          );
+                        }
+
                         return (
                           <div
                             key={lesson.id}
-                            className={`p-2 rounded-lg border text-left space-y-0.5 ${
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const courseId = getCourseIdBySubjectName(lesson.subject);
+                              if (onNavigateToCourse) {
+                                onNavigateToCourse(courseId, lesson.subject);
+                              } else {
+                                onOpenModulAjar(lesson.subject);
+                              }
+                            }}
+                            className={`p-2 rounded-lg border text-left space-y-0.5 hover:ring-2 hover:ring-sky-400 transition-all cursor-pointer ${
                               lesson.category === 'Peminatan MIPA'
-                                ? 'bg-white border-sky-200'
+                                ? 'bg-white border-sky-200 hover:border-sky-400'
                                 : lesson.category === 'Mata Pelajaran Wajib'
-                                ? 'bg-white border-emerald-200'
-                                : 'bg-white border-purple-200'
+                                ? 'bg-white border-emerald-200 hover:border-emerald-400'
+                                : 'bg-white border-purple-200 hover:border-purple-400'
                             }`}
+                            title={`Klik untuk buka silabus & video: ${lesson.subject}`}
                           >
                             <div className="flex items-center justify-between text-[10px]">
                               <span className="font-mono text-slate-400">{lesson.time}</span>

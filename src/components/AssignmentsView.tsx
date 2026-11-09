@@ -57,7 +57,7 @@ export const AssignmentsView: React.FC<AssignmentsViewProps> = ({ currentUser })
 
   // New Assignment Modal state (Kirim Tugas Mandiri)
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
-  const [newSubject, setNewSubject] = useState('Kimia Analitik 11 MIPA');
+  const [newSubject, setNewSubject] = useState('Kimia Peminatan');
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
 
@@ -961,10 +961,10 @@ export const AssignmentsView: React.FC<AssignmentsViewProps> = ({ currentUser })
                   onChange={(e) => setNewSubject(e.target.value)}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
                 >
-                  <option value="Kimia Analitik 11 MIPA">Kimia Analitik 11 MIPA</option>
-                  <option value="Fisika Peminatan 11 MIPA">Fisika Peminatan 11 MIPA</option>
-                  <option value="Biologi Sel 11 MIPA">Biologi Sel 11 MIPA</option>
-                  <option value="Matematika Peminatan">Matematika Peminatan</option>
+                  <option value="Kimia Peminatan">Kimia Peminatan</option>
+                  <option value="Fisika Peminatan">Fisika Peminatan</option>
+                  <option value="Biologi Peminatan">Biologi Peminatan</option>
+                  <option value="Matematika Tingkat Lanjut">Matematika Tingkat Lanjut</option>
                   <option value="Matematika Wajib">Matematika Wajib</option>
                   <option value="Bahasa Indonesia">Bahasa Indonesia</option>
                   <option value="Bahasa Inggris">Bahasa Inggris</option>
