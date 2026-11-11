@@ -9,8 +9,7 @@ import {
   Award, 
   FlaskConical,
   GraduationCap,
-  Sparkles,
-  ChevronRight,
+  HeartHandshake,
   School,
   Video,
   X,
@@ -24,7 +23,6 @@ interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   currentUser: UserProfile;
-  onOpenMobilePreview?: () => void;
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
   onLogout?: () => void;
@@ -34,7 +32,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   setActiveTab,
   currentUser,
-  onOpenMobilePreview,
   isMobileOpen = false,
   onCloseMobile,
   onLogout,
@@ -45,6 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'beranda', label: 'Beranda', icon: Home },
     { id: 'jadwal', label: 'Jadwal Pelajaran', icon: Calendar },
     { id: 'kelas', label: 'Kelas & Materi MIPA', icon: BookOpen },
+    { id: 'konseling', label: 'Konseling & Karir (BK)', icon: HeartHandshake },
     { id: 'lab_simulasi', label: 'Lab Sains Virtual', icon: FlaskConical },
     { id: 'kehadiran', label: 'Kehadiran Siswa', icon: UserCheck },
     { id: 'ujian', label: 'UKP / Ujian CBT', icon: FileText },
@@ -188,28 +186,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             })}
           </nav>
         </div>
-
-        {/* Quick Mobile App Preview Card (Only on desktop) */}
-        {onOpenMobilePreview && (
-          <div className="hidden lg:block p-3 bg-white/10 rounded-xl border border-white/10 text-xs">
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold text-white flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Akses Smartphone
-              </span>
-            </div>
-            <p className="text-sky-200 text-[11px] mb-2 leading-relaxed">
-              Website sudah dioptimalkan penuh untuk dibuka langsung di browser HP.
-            </p>
-            <button
-              onClick={onOpenMobilePreview}
-              className="w-full py-1.5 px-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-all cursor-pointer"
-            >
-              <span>Pratinjau Layar HP</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
 
         {/* Logout Quick Action */}
         {onLogout && (

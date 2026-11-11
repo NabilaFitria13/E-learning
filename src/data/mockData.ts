@@ -1245,12 +1245,12 @@ export const MOCK_MODUL_AJAR: Record<string, ModulAjarData> = {
   },
   'Projek Penguatan P5': {
     id: 'modul_p5',
-    subject: 'Projek Penguatan P5',
-    title: 'Gaya Hidup Berkelanjutan: Inovasi Eco-School SMAN 25 & Pengolahan Sirkular',
-    grade: 'Kelas XI SMA (Fase F)',
+    subject: 'Projek Penguatan Profil Pelajar Pancasila (P5)',
+    title: 'Inovasi Eco-School & Pengolahan Sirkular SMAN 25 Jakarta',
+    grade: 'Fase F (Kelas XI SMA MIPA)',
     phase: 'Fase F (Kurikulum Merdeka SMA)',
-    author: 'Tim Fasilitator Kurikulum Merdeka SMAN 25',
-    duration: '2 JP Blok Projek Terpadu',
+    author: 'Dra. Nurhayati, M.M. & Tim Fasilitator P5',
+    duration: 'Alokasi 72 JP Kokurikuler (Fase F)',
     capaianPembelajaran: 'Peserta didik mampu membangun kesadaran kritis terhadap dampak emisi jejak karbon (carbon footprint) dan limbah organik di lingkungan urban Jakarta, merancang inovasi teknologi tepat guna berbasis circular economy, serta mengaktualisasikan enam dimensi Profil Pelajar Pancasila dalam aksi nyata terpadu.',
     tujuanPembelajaran: [
       'Menghitung jejak karbon (carbon footprint) dari konsumsi energi listrik dan timbulan sampah harian di sekolah.',
@@ -2106,7 +2106,7 @@ const BASE_MIPA_SCHEDULE_SENIN_TO_JUMAT: ScheduleItem[] = [
   { id: 'sch_m_sel_1', day: 'Selasa', time: '07.15 - 09.30', subject: 'Kimia Peminatan', teacher: 'Drs. Bambang Sudarsono, M.Si', room: 'Ruang R.204 / Lab Kimia', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-1 s.d. 3', category: 'Peminatan MIPA' },
   { id: 'sch_m_sel_break1', day: 'Selasa', time: '09.30 - 09.50', subject: 'Istirahat I & Relaksasi', teacher: 'Piket Harian', room: 'Kantin Sehat & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
   { id: 'sch_m_sel_2', day: 'Selasa', time: '09.50 - 11.20', subject: 'Biologi Peminatan', teacher: 'Ibu Endang Suryani, M.Si', room: 'Lab Biologi', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Peminatan MIPA' },
-  { id: 'sch_m_sel_3', day: 'Selasa', time: '11.20 - 12.05', subject: 'Bimbingan Konseling (BK)', teacher: 'Drs. M. Taufik, M.Psi', room: 'Ruang BK / R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Pengembangan & P5' },
+  { id: 'sch_m_sel_3', day: 'Selasa', time: '11.20 - 12.05', subject: 'Layanan Bimbingan Konseling (BK)', teacher: 'Drs. M. Taufik, M.Psi', room: 'Ruang BK / R.204', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-6', category: 'Bimbingan Konseling (BK)' },
   { id: 'sch_m_sel_break2', day: 'Selasa', time: '12.05 - 12.50', subject: 'Istirahat II / ISHOMA (Sholat Dzuhur Berjamaah)', teacher: 'Guru Pendamping', room: 'Masjid Al-Ikhlas & Kantin', status: 'Akan Datang', isBreak: true, periodRange: '45 Menit', category: 'Pembiasaan & Istirahat' },
   { id: 'sch_m_sel_4', day: 'Selasa', time: '12.50 - 15.05', subject: 'Matematika Wajib', teacher: 'Ibu Ratna Dewi, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 3, periodRange: 'Jam Ke-7 s.d. 9', category: 'Mata Pelajaran Wajib' },
 
@@ -2136,7 +2136,7 @@ const BASE_MIPA_SCHEDULE_SENIN_TO_JUMAT: ScheduleItem[] = [
   { id: 'sch_m_jum_break1', day: 'Jumat', time: '09.45 - 10.05', subject: 'Istirahat I & Pemulihan Hidrasi', teacher: 'Piket Harian', room: 'Kantin & Halaman', status: 'Akan Datang', isBreak: true, periodRange: '20 Menit', category: 'Pembiasaan & Istirahat' },
   { id: 'sch_m_jum_2', day: 'Jumat', time: '10.05 - 11.35', subject: 'Pendidikan Pancasila', teacher: 'Ibu Siti Aminah, S.Pd', room: 'Ruang R.204', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-4 s.d. 5', category: 'Mata Pelajaran Wajib' },
   { id: 'sch_m_jum_break2', day: 'Jumat', time: '11.35 - 13.00', subject: 'ISHOMA Sholat Jumat Berjamaah & Keputrian', teacher: 'Guru Pendamping & DKM', room: 'Masjid Al-Ikhlas & Aula', status: 'Akan Datang', isBreak: true, periodRange: '85 Menit', category: 'Pembiasaan & Istirahat' },
-  { id: 'sch_m_jum_3', day: 'Jumat', time: '13.00 - 14.30', subject: 'Projek Penguatan Profil Pelajar Pancasila (P5)', teacher: 'Tim Fasilitator P5', room: 'Aula Sekolah & Lab Lingkungan', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-6 s.d. 7', category: 'Pengembangan & P5' },
+  { id: 'sch_m_jum_3', day: 'Jumat', time: '13.00 - 14.30', subject: 'Projek Penguatan Profil Pelajar Pancasila (P5)', teacher: 'Tim Fasilitator P5', room: 'Aula Sekolah & Lab Lingkungan', status: 'Akan Datang', jp: 2, periodRange: 'Jam Ke-6 s.d. 7', category: 'Projek Penguatan P5' },
   { id: 'sch_m_jum_4', day: 'Jumat', time: '14.30 - 15.15', subject: 'Pendidikan Seni & Budaya', teacher: 'Ibu Maya Lestari, S.Sn', room: 'Sanggar Seni & Desain', status: 'Akan Datang', jp: 1, periodRange: 'Jam Ke-8', category: 'Mata Pelajaran Wajib' },
 ];
 

@@ -134,8 +134,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
                 <span className="text-xs text-slate-500 font-medium block">Mata Pelajaran SMA MIPA</span>
-                <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">14 Mapel</span>
-                <span className="text-[11px] text-sky-600 block mt-0.5 font-medium">Fase F Kurikulum</span>
+                <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">12 Mata Pelajaran</span>
+                <span className="text-[11px] text-sky-600 block mt-0.5 font-medium">+ BK &amp; Projek P5 (Pendamping)</span>
               </div>
               <div className="w-11 h-11 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-[#0284c7] shrink-0">
                 <GraduationCap className="w-5 h-5" />

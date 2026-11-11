@@ -158,7 +158,7 @@ export interface ScheduleItem {
   status: 'Selesai' | 'Berlangsung' | 'Akan Datang';
   jp?: number;
   periodRange?: string;
-  category?: 'Peminatan MIPA' | 'Mata Pelajaran Wajib' | 'Pengembangan & P5' | 'Pembiasaan & Istirahat';
+  category?: 'Peminatan MIPA' | 'Mata Pelajaran Wajib' | 'Pengembangan & P5' | 'Pembiasaan & Istirahat' | 'Bimbingan Konseling (BK)' | 'Projek Penguatan P5';
   isBreak?: boolean;
 }
 

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Bell, 
-  Smartphone, 
   Menu,
   CheckCircle2, 
   AlertCircle, 
@@ -21,7 +20,6 @@ interface HeaderProps {
   currentUser: UserProfile;
   currentSchool: string;
   onSwitchSchool: (school: string) => void;
-  onOpenMobilePreview?: () => void;
   onOpenAttendance: () => void;
   onOpenSettings?: () => void;
   onToggleMobileMenu?: () => void;
@@ -34,7 +32,6 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   currentSchool,
   onSwitchSchool,
-  onOpenMobilePreview,
   onOpenAttendance,
   onOpenSettings,
   onToggleMobileMenu,
@@ -172,22 +169,6 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="Mode Gelap / Terang"
             >
               {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-          )}
-
-          {/* Mobile Preview Trigger (Visible on medium/large screens) */}
-          {onOpenMobilePreview && (
-            <button
-              onClick={onOpenMobilePreview}
-              className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer border ${
-                isDarkMode 
-                  ? 'bg-sky-950/60 hover:bg-sky-900 text-sky-300 border-sky-800' 
-                  : 'bg-sky-50 hover:bg-sky-100 text-[#0284c7] border-sky-200'
-              }`}
-              title="Pratinjau tampilan layar HP"
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>Mockup HP</span>
             </button>
           )}
 

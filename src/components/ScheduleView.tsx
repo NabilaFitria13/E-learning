@@ -18,7 +18,9 @@ import {
   Search,
   Grid,
   List,
-  Play
+  Play,
+  HeartHandshake,
+  Award
 } from 'lucide-react';
 import { ScheduleItem, UserProfile } from '../types';
 import { 
@@ -31,7 +33,7 @@ import {
 /**
  * Helper to determine whether a schedule item is an active academic lesson
  * (which should display 'Silabus & Video' and 'Baca Materi Pelajaran' buttons),
- * or a non-academic / pembiasaan / upacara / istirahat session (where buttons must be hidden).
+ * or a non-academic / pembiasaan / upacara / istirahat / BK / P5 session (where academic course buttons must be hidden).
  */
 export const isAcademicScheduleItem = (item: {
   subject: string;
@@ -46,7 +48,11 @@ export const isAcademicScheduleItem = (item: {
     cat.includes('pembiasaan') ||
     cat.includes('istirahat') ||
     cat.includes('non-akademik') ||
-    cat.includes('kegiatan')
+    cat.includes('kegiatan') ||
+    cat.includes('bk') ||
+    cat.includes('konseling') ||
+    cat.includes('p5') ||
+    cat.includes('projek')
   ) {
     return false;
   }
@@ -79,7 +85,13 @@ export const isAcademicScheduleItem = (item: {
     'penyusunan modul',
     'pengawasan ujian',
     'konsultasi belajar',
-    'input nilai'
+    'input nilai',
+    'bimbingan konseling',
+    'layanan bimbingan konseling',
+    '(bk)',
+    'projek penguatan profil pelajar pancasila',
+    'projek penguatan p5',
+    'p5'
   ];
 
   if (nonAcademicKeywords.some((kw) => subj.includes(kw))) {
@@ -93,12 +105,14 @@ interface ScheduleViewProps {
   currentUser: UserProfile;
   onOpenModulAjar: (subject: string) => void;
   onNavigateToCourse?: (courseId: string, subjectName?: string) => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
 export const ScheduleView: React.FC<ScheduleViewProps> = ({ 
   currentUser,
   onOpenModulAjar,
-  onNavigateToCourse
+  onNavigateToCourse,
+  onNavigateTab
 }) => {
   const [selectedDay, setSelectedDay] = useState<'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat'>('Senin');
   const [viewMode, setViewMode] = useState<'harian' | 'matriks'>('harian');
@@ -566,6 +580,170 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
 
                 const isAcademic = isAcademicScheduleItem(item);
 
+                const isBK = 
+                  item.subject.toLowerCase().includes('bimbingan konseling') || 
+                  item.subject.toLowerCase().includes('(bk)') || 
+                  (item.category || '').toLowerCase().includes('bk') || 
+                  (item.category || '').toLowerCase().includes('konseling');
+
+                const isP5 = 
+                  item.subject.toLowerCase().includes('profil pelajar pancasila') || 
+                  item.subject.toLowerCase().includes('p5') || 
+                  (item.category || '').toLowerCase().includes('p5') ||
+                  (item.category || '').toLowerCase().includes('projek');
+
+                // SPECIAL RENDER: Bimbingan Konseling (BK) Card
+                if (isBK) {
+                  return (
+                    <div
+                      key={item.id}
+                      className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-white border-purple-200/90 shadow-2xs hover:border-purple-300 ${
+                        isOngoing ? 'ring-2 ring-purple-300 border-purple-400' : ''
+                      }`}
+                    >
+                      {/* Left Side: Time, JP Badge, Subject & Teacher */}
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="px-3 py-2.5 rounded-xl text-xs font-mono font-bold flex flex-col items-center justify-center shrink-0 min-w-[110px] bg-purple-100/90 border border-purple-200 text-purple-900 shadow-2xs">
+                          <HeartHandshake className="w-4 h-4 mb-1 text-purple-700" />
+                          <span className="tracking-tight">{item.time}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded mt-1 font-sans font-semibold bg-purple-200 text-purple-900">
+                            {item.jp ? `${item.jp} JP (Layanan BK)` : 'Layanan BK'}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-200">
+                              Layanan Bimbingan Konseling (BK)
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
+                              Pengembangan Pribadi &amp; Karir
+                            </span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                isOngoing
+                                  ? 'bg-purple-200 text-purple-900 animate-pulse'
+                                  : isFinished
+                                  ? 'bg-slate-100 text-slate-600'
+                                  : 'bg-amber-100 text-amber-900'
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-slate-900 text-base leading-snug">
+                            {item.subject}
+                          </h3>
+                          <p className="text-xs text-purple-950 font-medium">
+                            Fokus: Konsultasi Karir PTN (SNBP/SNBT), Minat Bakat RIASEC &amp; Bimbingan Psikososial
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <User className="w-3.5 h-3.5 text-purple-600" />
+                              <span className="text-slate-800 font-semibold">{item.teacher}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5 text-purple-600" />
+                              <span className="text-slate-600">{item.room}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Side: Direct Consultation Action (NO SYLLABUS/VIDEO OR BACA MATERI BUTTONS) */}
+                      <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => onNavigateTab ? onNavigateTab('konseling') : null}
+                          className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white cursor-pointer active:scale-95"
+                          title="Buka Menu Layanan Konseling & Karir BK"
+                        >
+                          <HeartHandshake className="w-4 h-4 text-purple-200" />
+                          <span>Layanan &amp; Konsultasi BK</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // SPECIAL RENDER: Projek Penguatan Profil Pelajar Pancasila (P5) Card
+                if (isP5) {
+                  return (
+                    <div
+                      key={item.id}
+                      className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-emerald-50/80 via-teal-50/50 to-white border-emerald-200/90 shadow-2xs hover:border-emerald-300 ${
+                        isOngoing ? 'ring-2 ring-emerald-300 border-emerald-400' : ''
+                      }`}
+                    >
+                      {/* Left Side: Time, JP Badge, Subject & Fasilitator */}
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="px-3 py-2.5 rounded-xl text-xs font-mono font-bold flex flex-col items-center justify-center shrink-0 min-w-[110px] bg-emerald-100/90 border border-emerald-200 text-emerald-900 shadow-2xs">
+                          <Sparkles className="w-4 h-4 mb-1 text-emerald-700" />
+                          <span className="tracking-tight">{item.time}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded mt-1 font-sans font-semibold bg-emerald-200 text-emerald-900">
+                            {item.jp ? `${item.jp} JP (Blok Projek)` : 'Blok P5'}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-200">
+                              Kokurikuler Projek Penguatan P5
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-200">
+                              Fase F (SMA)
+                            </span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                isOngoing
+                                  ? 'bg-emerald-200 text-emerald-900 animate-pulse'
+                                  : isFinished
+                                  ? 'bg-slate-100 text-slate-600'
+                                  : 'bg-amber-100 text-amber-900'
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-slate-900 text-base leading-snug">
+                            {item.subject}
+                          </h3>
+                          <p className="text-xs text-emerald-950 font-medium">
+                            Tema: Gaya Hidup Berkelanjutan — Inovasi Pengolahan Sampah Organik &amp; Biopori Terpadu
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <User className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-slate-800 font-semibold">Fasilitator: {item.teacher}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-slate-600">Lokasi: {item.room}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Side: Direct View P5 Report Action (NO SYLLABUS/VIDEO OR BACA MATERI BUTTONS) */}
+                      <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => onNavigateTab ? onNavigateTab('rapor') : null}
+                          className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white cursor-pointer active:scale-95"
+                          title="Buka Capaian Rapor Projek Profil Pelajar Pancasila (P5)"
+                        >
+                          <Award className="w-4 h-4 text-emerald-200" />
+                          <span>Rapor Capaian P5</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
                 // SPECIAL RENDER: Non-Academic Session (Pembiasaan, Upacara, Senam, Literasi Pagi, dll.)
                 // Sembunyikan sepenuhnya tombol "Silabus & Video" dan "Baca Materi Pelajaran"
                 if (!isAcademic) {
@@ -817,6 +995,65 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                         const isLessonAcademic = isAcademicScheduleItem(lesson);
 
                         if (!isLessonAcademic) {
+                          const isLessonBK = (lesson.subject && lesson.subject.includes('Bimbingan Konseling')) || (lesson.category && lesson.category.includes('BK'));
+                          const isLessonP5 = (lesson.subject && (lesson.subject.includes('P5') || lesson.subject.includes('Pelajar Pancasila'))) || (lesson.category && lesson.category.includes('P5'));
+
+                          if (isLessonBK) {
+                            return (
+                              <div
+                                key={lesson.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onNavigateTab) onNavigateTab('konseling');
+                                }}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50/70 hover:bg-purple-100/90 hover:border-purple-400 text-left space-y-0.5 cursor-pointer transition-all"
+                                title="Layanan Bimbingan Konseling (BK) - Klik untuk buka menu Konseling & Karir"
+                              >
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="font-mono text-purple-700 font-bold">{lesson.time.split(' - ')[0]}</span>
+                                  <span className="font-bold text-purple-800 text-[8px] bg-purple-200/80 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                    <HeartHandshake className="w-2.5 h-2.5" />
+                                    BK (1 JP)
+                                  </span>
+                                </div>
+                                <div className="font-bold text-purple-900 text-xs truncate">
+                                  {lesson.subject}
+                                </div>
+                                <div className="text-[10px] text-purple-700/80 truncate">
+                                  {lesson.teacher} · {lesson.room}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          if (isLessonP5) {
+                            return (
+                              <div
+                                key={lesson.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onNavigateTab) onNavigateTab('rapor');
+                                }}
+                                className="p-2 rounded-lg border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/90 hover:border-emerald-400 text-left space-y-0.5 cursor-pointer transition-all"
+                                title="Projek Profil Pelajar Pancasila (P5) - Klik untuk buka e-Rapor P5"
+                              >
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="font-mono text-emerald-700 font-bold">{lesson.time.split(' - ')[0]}</span>
+                                  <span className="font-bold text-emerald-800 text-[8px] bg-emerald-200/80 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                    <Sparkles className="w-2.5 h-2.5" />
+                                    P5 (2 JP)
+                                  </span>
+                                </div>
+                                <div className="font-bold text-emerald-900 text-xs truncate">
+                                  {lesson.subject}
+                                </div>
+                                <div className="text-[10px] text-emerald-700/80 truncate">
+                                  {lesson.teacher} · {lesson.room}
+                                </div>
+                              </div>
+                            );
+                          }
+
                           return (
                             <div
                               key={lesson.id}

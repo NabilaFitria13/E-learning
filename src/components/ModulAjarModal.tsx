@@ -27,6 +27,7 @@ import {
   Maximize2
 } from 'lucide-react';
 import { ModulAjarData } from '../types';
+import { P5ProjectModal } from './P5ProjectModal';
 
 interface ModulAjarModalProps {
   modul: ModulAjarData;
@@ -39,6 +40,18 @@ export const ModulAjarModal: React.FC<ModulAjarModalProps> = ({
   onClose,
   onOpenSimulation,
 }) => {
+  // If this is Projek Penguatan Profil Pelajar Pancasila (P5), route to specialized P5 project modal
+  const isP5 = 
+    modul.id === 'modul_p5' || 
+    modul.subject?.toLowerCase().includes('p5') || 
+    modul.subject?.toLowerCase().includes('pelajar pancasila') || 
+    modul.title?.toLowerCase().includes('eco-school') || 
+    modul.title?.toLowerCase().includes('jejak karbon');
+
+  if (isP5) {
+    return <P5ProjectModal modul={modul} onClose={onClose} />;
+  }
+
   const [activeTab, setActiveTab] = useState<'materi' | 'tujuan' | 'lkpd' | 'glosarium' | 'kuis'>('materi');
   const [checkedObjectives, setCheckedObjectives] = useState<Record<number, boolean>>({});
   const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(null);

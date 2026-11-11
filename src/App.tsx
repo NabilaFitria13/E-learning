@@ -10,9 +10,9 @@ import { AssignmentsView } from './components/AssignmentsView';
 import { ScheduleView } from './components/ScheduleView';
 import { ReportCardView } from './components/ReportCardView';
 import { SettingsView } from './components/SettingsView';
+import { CounselingView } from './components/CounselingView';
 import { CBTExamModal } from './components/CBTExamModal';
 import { AttendanceModal } from './components/AttendanceModal';
-import { MobileAppMockupModal } from './components/MobileAppMockupModal';
 import { ModulAjarModal } from './components/ModulAjarModal';
 import { LoginModal } from './components/LoginModal';
 import { TeacherDashboardView } from './components/TeacherDashboardView';
@@ -20,7 +20,6 @@ import { CURRENT_STUDENT_XI_IPA, resolveModulAjar } from './data/mockData';
 import { ExamItem, UserProfile, ModulAjarData } from './types';
 import { authService } from './services/authService';
 import { 
-  Smartphone, 
   Home, 
   Calendar, 
   Camera, 
@@ -41,7 +40,6 @@ export default function App() {
   // Modals & Active Workflows
   const [activeExam, setActiveExam] = useState<ExamItem | null>(null);
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState<boolean>(false);
-  const [isMobileMockupOpen, setIsMobileMockupOpen] = useState<boolean>(false);
   const [activeModulAjar, setActiveModulAjar] = useState<ModulAjarData | null>(null);
   const [activeSimInitial, setActiveSimInitial] = useState<'titrasi_kimia' | 'fisika_newton'>('titrasi_kimia');
   const [selectedCourseForView, setSelectedCourseForView] = useState<string | null>(null);
@@ -136,7 +134,6 @@ export default function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           currentUser={currentUser}
-          onOpenMobilePreview={() => setIsMobileMockupOpen(true)}
           isMobileOpen={isMobileDrawerOpen}
           onCloseMobile={() => setIsMobileDrawerOpen(false)}
           onLogout={handleLogout}
@@ -149,7 +146,6 @@ export default function App() {
             currentUser={currentUser}
             currentSchool={currentSchool}
             onSwitchSchool={setCurrentSchool}
-            onOpenMobilePreview={() => setIsMobileMockupOpen(true)}
             onOpenAttendance={() => setIsAttendanceModalOpen(true)}
             onOpenSettings={() => setActiveTab('pengaturan')}
             onToggleMobileMenu={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
@@ -284,11 +280,16 @@ export default function App() {
                   <AssignmentsView currentUser={currentUser} />
                 )}
 
+                {activeTab === 'konseling' && (
+                  <CounselingView currentUser={currentUser} />
+                )}
+
                 {activeTab === 'jadwal' && (
                   <ScheduleView 
                     currentUser={currentUser}
                     onOpenModulAjar={handleOpenModulAjar} 
                     onNavigateToCourse={handleNavigateToCourse}
+                    onNavigateTab={setActiveTab}
                   />
                 )}
 
@@ -369,18 +370,6 @@ export default function App() {
         </button>
       </nav>
 
-      {/* Floating Desktop Mobile Preview Button (hidden on smartphone devices) */}
-      <div className="hidden lg:block fixed bottom-5 right-5 z-40">
-        <button
-          onClick={() => setIsMobileMockupOpen(true)}
-          className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 text-xs font-bold transition-all hover:scale-105 border border-slate-700 cursor-pointer"
-          title="Simulasi Tampilan Smartphone Siswa"
-        >
-          <Smartphone className="w-4 h-4 text-amber-400" />
-          <span>Mockup Layar HP</span>
-        </button>
-      </div>
-
       {/* CBT Exam Modal */}
       {activeExam && (
         <CBTExamModal
@@ -407,16 +396,6 @@ export default function App() {
           modul={activeModulAjar}
           onClose={() => setActiveModulAjar(null)}
           onOpenSimulation={handleOpenSimulation}
-        />
-      )}
-
-      {/* Mobile App Phone Preview Modal for Desktop */}
-      {isMobileMockupOpen && (
-        <MobileAppMockupModal
-          currentUser={currentUser}
-          onClose={() => setIsMobileMockupOpen(false)}
-          onOpenAttendance={() => setIsAttendanceModalOpen(true)}
-          hasCheckedIn={hasCheckedIn}
         />
       )}
 

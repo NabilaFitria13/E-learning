@@ -29,7 +29,9 @@ import {
   GraduationCap,
   CheckCheck,
   Activity,
-  MessageSquare
+  MessageSquare,
+  HeartHandshake,
+  Compass
 } from 'lucide-react';
 import { SubjectCourse, UserProfile } from '../types';
 import { MOCK_COURSES, MOCK_SCHEDULE_BY_ROLE, resolveModulAjar } from '../data/mockData';
@@ -650,12 +652,22 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
         return cn === target || cn.includes(target) || target.includes(cn);
       });
       if (match) {
+        if (match.id === 'course_bk' || match.name.includes('Bimbingan Konseling') || match.name.includes('BK')) {
+          if (onNavigateTab) onNavigateTab('konseling');
+          if (onClearInitialCourse) onClearInitialCourse();
+          return;
+        }
+        if (match.id === 'course_p5' || match.name.includes('P5') || match.name.includes('Pelajar Pancasila')) {
+          if (onNavigateTab) onNavigateTab('rapor');
+          if (onClearInitialCourse) onClearInitialCourse();
+          return;
+        }
         setSelectedCourse(match);
         setActiveChapterId(match.chapters[0]?.id || null);
         setIsPlaying(false);
       }
     }
-  }, [initialCourseId]);
+  }, [initialCourseId, onNavigateTab, onClearInitialCourse]);
 
   // Helper to match timetable slot with corresponding Course
   const findMatchingCourse = (slotSubject: string): SubjectCourse | undefined => {
@@ -946,12 +958,13 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Filter Categories Tailored to Curriculum & Student Schedule (14 Official Subjects for Grade 11 MIPA)
+  // Filter Categories Tailored to Curriculum & Student Schedule (12 Official Academic Subjects + 2 Companion Modules for Grade 11 MIPA)
   const categories = [
     'Semua Sesuai Jadwal (14)',
+    '12 Mata Pelajaran Akademik',
     'Peminatan MIPA (4)',
     'Mata Pelajaran Wajib (8)',
-    'Pengembangan & P5 (2)'
+    'Modul Pendamping: BK & P5 (2)'
   ];
 
   // Filter Courses based on active category, day filter, & search query
@@ -975,13 +988,16 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
     if (filterCategory.startsWith('Semua Sesuai Jadwal') || filterCategory === 'Semua Pelajaran') {
       return true;
     }
+    if (filterCategory.includes('12 Mata Pelajaran')) {
+      return course.category === 'SMA MIPA' || course.category === 'Umum' || course.scheduleGroup === 'Peminatan' || course.scheduleGroup === 'Wajib';
+    }
     if (filterCategory.startsWith('Peminatan')) {
       return course.scheduleGroup === 'Peminatan' || course.category === 'SMA MIPA';
     }
     if (filterCategory.startsWith('Mata Pelajaran Wajib') || filterCategory.startsWith('Wajib')) {
       return course.scheduleGroup === 'Wajib' || course.category === 'Umum';
     }
-    if (filterCategory.startsWith('Pengembangan')) {
+    if (filterCategory.includes('Pendamping') || filterCategory.includes('Pengembangan')) {
       return course.category === 'Pengembangan' || course.scheduleGroup === 'Pengembangan';
     }
 
@@ -1184,31 +1200,86 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
 
                     {/* Quick 1-Click Action Buttons */}
                     <div className="pt-2.5 mt-2 border-t border-sky-100 flex items-center gap-1.5">
-                      <button
-                        onClick={() => onOpenModulAjar(slot.subject)}
-                        className="flex-1 py-1.5 px-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-lg text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer"
-                        title="Baca Modul Ajar Lengkap"
-                      >
-                        <BookOpen className="w-3 h-3" />
-                        <span>Baca Materi</span>
-                      </button>
+                      {(() => {
+                        const isSlotBK = slot.subject.includes('Bimbingan Konseling') || slot.subject.includes('BK');
+                        const isSlotP5 = slot.subject.includes('P5') || slot.subject.includes('Pelajar Pancasila');
 
-                      {matchingCourse && (
-                        <button
-                          onClick={() => {
-                            setSelectedCourse(matchingCourse);
-                            setActiveChapterId(matchingCourse.chapters[0]?.id || null);
-                            setIsPlaying(false);
-                            setVideoLoadError(false);
-                            stopTeacherScript();
-                          }}
-                          className="py-1.5 px-2 bg-white hover:bg-sky-100 text-[#0284c7] border border-sky-200 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
-                          title="Tonton Video Pembelajaran & Silabus"
-                        >
-                          <Play className="w-3 h-3 fill-current" />
-                          <span>Video</span>
-                        </button>
-                      )}
+                        if (isSlotBK) {
+                          return (
+                            <>
+                              <button
+                                onClick={() => onNavigateTab?.('konseling')}
+                                className="flex-1 py-1.5 px-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                                title="Buka Layanan Konsultasi BK"
+                              >
+                                <HeartHandshake className="w-3 h-3" />
+                                <span>Konsultasi BK</span>
+                              </button>
+                              <button
+                                onClick={() => onNavigateTab?.('konseling')}
+                                className="py-1.5 px-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                                title="Lihat Jadwal Bimbingan BK"
+                              >
+                                <Calendar className="w-3 h-3" />
+                                <span>Jadwal Bimbingan</span>
+                              </button>
+                            </>
+                          );
+                        }
+
+                        if (isSlotP5) {
+                          return (
+                            <>
+                              <button
+                                onClick={() => onOpenModulAjar('Projek Penguatan Profil Pelajar Pancasila (P5)')}
+                                className="flex-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                                title="Lihat Panduan Projek P5"
+                              >
+                                <Compass className="w-3 h-3" />
+                                <span>Panduan Projek</span>
+                              </button>
+                              <button
+                                onClick={() => onNavigateTab?.('rapor')}
+                                className="py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                                title="Lihat Jurnal & Progress P5 6 Dimensi"
+                              >
+                                <Sparkles className="w-3 h-3 text-emerald-600" />
+                                <span>Jurnal P5</span>
+                              </button>
+                            </>
+                          );
+                        }
+
+                        return (
+                          <>
+                            <button
+                              onClick={() => onOpenModulAjar(slot.subject)}
+                              className="flex-1 py-1.5 px-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-lg text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer"
+                              title="Baca Modul Ajar Lengkap"
+                            >
+                              <BookOpen className="w-3 h-3" />
+                              <span>Baca Materi</span>
+                            </button>
+
+                            {matchingCourse && (
+                              <button
+                                onClick={() => {
+                                  setSelectedCourse(matchingCourse);
+                                  setActiveChapterId(matchingCourse.chapters[0]?.id || null);
+                                  setIsPlaying(false);
+                                  setVideoLoadError(false);
+                                  stopTeacherScript();
+                                }}
+                                className="py-1.5 px-2 bg-white hover:bg-sky-100 text-[#0284c7] border border-sky-200 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                title="Tonton Video Pembelajaran & Silabus"
+                              >
+                                <Play className="w-3 h-3 fill-current" />
+                                <span>Video</span>
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
 
                       {slot.subject.includes('Kimia') && (
                         <button
@@ -1252,9 +1323,10 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
               }`}
             >
               {cat.includes('Semua') && <Calendar className="w-3.5 h-3.5 text-amber-500" />}
+              {cat.includes('12 Mata Pelajaran') && <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />}
               {cat.includes('Peminatan') && <Layers className="w-3.5 h-3.5 text-sky-600" />}
               {cat.includes('Wajib') && <BookOpen className="w-3.5 h-3.5 text-emerald-600" />}
-              {cat.includes('Pengembangan') && <Sparkles className="w-3.5 h-3.5 text-purple-600" />}
+              {(cat.includes('Pendamping') || cat.includes('Pengembangan')) && <Sparkles className="w-3.5 h-3.5 text-purple-600" />}
               <span>{cat}</span>
             </button>
           ))}
@@ -1262,7 +1334,7 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
 
         <div className="flex items-center gap-2 text-xs text-slate-500 bg-white border border-slate-200/80 px-3 py-1.5 rounded-xl shadow-2xs self-start sm:self-auto">
           <BookOpen className="w-3.5 h-3.5 text-[#0284c7]" />
-          <span>Menampilkan <strong className="text-slate-900 font-bold">{filteredCourses.length}</strong> dari 14 Materi Pelajaran</span>
+          <span>Menampilkan <strong className="text-slate-900 font-bold">{filteredCourses.length}</strong> Modul (12 Mapel Akademik + 2 Pendamping BK &amp; P5)</span>
         </div>
       </div>
 
@@ -1354,12 +1426,24 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
                   {/* Progress Bar */}
                   <div className="pt-1 space-y-1.5">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-500">Progres Modul Belajar</span>
+                      <span className="text-slate-500">
+                        {course.id === 'course_bk' || course.name.includes('BK') 
+                          ? 'Progres Layanan Bimbingan' 
+                          : course.id === 'course_p5' || course.name.includes('P5') 
+                          ? 'Progres Capaian Projek P5' 
+                          : 'Progres Modul Belajar'}
+                      </span>
                       <span className="font-bold text-slate-800">{progressPercent}%</span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#0284c7] rounded-full transition-all duration-500"
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          course.id === 'course_bk' || course.name.includes('BK')
+                            ? 'bg-purple-600'
+                            : course.id === 'course_p5' || course.name.includes('P5')
+                            ? 'bg-emerald-600'
+                            : 'bg-[#0284c7]'
+                        }`}
                         style={{ width: `${progressPercent}%` }}
                       ></div>
                     </div>
@@ -1367,33 +1451,103 @@ export const CoursesView: React.FC<CoursesViewProps> = ({
                 </div>
               </div>
 
-              {/* Action Buttons: Silabus & Video + Modul Ajar */}
-              <div className="p-5 pt-0 flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedCourse(course);
-                    setActiveChapterId(course.chapters[0]?.id || null);
-                    setIsPlaying(false);
-                    setVideoLoadError(false);
-                    stopTeacherScript();
-                  }}
-                  className="flex-1 py-2 px-3 bg-sky-50 hover:bg-sky-100 text-[#0284c7] border border-sky-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Silabus & Video</span>
-                </button>
+              {/* Action Buttons: Specialized for BK & P5 vs Academic Subjects */}
+              {(() => {
+                const isBK = course.id === 'course_bk' || course.name.includes('Bimbingan Konseling') || course.name.includes('BK');
+                const isP5 = course.id === 'course_p5' || course.name.includes('P5') || course.name.includes('Pelajar Pancasila');
 
-                <button
-                  onClick={() => {
-                    onOpenModulAjar(course.name);
-                  }}
-                  className="py-2 px-3 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
-                  title="Buka Modul Ajar Lengkap"
-                >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span>Baca Materi</span>
-                </button>
-              </div>
+                if (isBK) {
+                  return (
+                    <div className="p-5 pt-0 flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          if (onNavigateTab) {
+                            onNavigateTab('konseling');
+                          }
+                        }}
+                        className="flex-1 py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                        title="Ajukan Sesi Konsultasi dengan Guru BK"
+                      >
+                        <HeartHandshake className="w-3.5 h-3.5" />
+                        <span>Konsultasi BK</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          if (onNavigateTab) {
+                            onNavigateTab('konseling');
+                          }
+                        }}
+                        className="py-2 px-3 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
+                        title="Lihat Jadwal & Riwayat Bimbingan Siswa"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Lihat Jadwal Bimbingan</span>
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (isP5) {
+                  return (
+                    <div className="p-5 pt-0 flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          onOpenModulAjar('Projek Penguatan Profil Pelajar Pancasila (P5)');
+                        }}
+                        className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                        title="Buka Dokumen Panduan Projek P5 SMAN 25"
+                      >
+                        <Compass className="w-3.5 h-3.5" />
+                        <span>Lihat Panduan Projek</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          if (onNavigateTab) {
+                            onNavigateTab('rapor');
+                          }
+                        }}
+                        className="py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
+                        title="Buka Lembar Penilaian Jurnal & Progress P5 (6 Dimensi)"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Jurnal & Progress P5</span>
+                      </button>
+                    </div>
+                  );
+                }
+
+                // Regular Academic Subjects (Fisika, Kimia, Biologi, Matematika, dll.)
+                return (
+                  <div className="p-5 pt-0 flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setActiveChapterId(course.chapters[0]?.id || null);
+                        setIsPlaying(false);
+                        setVideoLoadError(false);
+                        stopTeacherScript();
+                      }}
+                      className="flex-1 py-2 px-3 bg-sky-50 hover:bg-sky-100 text-[#0284c7] border border-sky-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Silabus & Video</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        onOpenModulAjar(course.name);
+                      }}
+                      className="py-2 px-3 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
+                      title="Buka Modul Ajar Lengkap"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Baca Materi</span>
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
